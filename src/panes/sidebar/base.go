@@ -2,8 +2,6 @@
 package sidebar
 
 import (
-	"log"
-
 	"leetui/src/lib/viewmodel"
 	"leetui/src/panes/sidebar/components"
 
@@ -40,7 +38,6 @@ func (m SidebarModel) Init() tea.Cmd {
 }
 
 func (m SidebarModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	log.Printf("handle sidebar msg: %v", msg)
 	var cmd tea.Cmd
 	m.search, cmd = m.search.Update(msg)
 	return m, cmd
