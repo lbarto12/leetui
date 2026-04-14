@@ -4,6 +4,7 @@ package state
 import (
 	"leetui/src/panes/mainbody"
 	"leetui/src/panes/sidebar"
+	"leetui/src/state/focus"
 )
 
 type AppState struct {
@@ -16,9 +17,11 @@ type AppState struct {
 }
 
 func MakeAppState() AppState {
-	return AppState{
+	as := AppState{
 		mainbody: mainbody.MakeMainBodyModel(),
 		sidebar:  sidebar.MakeSidebarModel(),
-		focused:  "main",
+		focused:  focus.Main,
 	}
+
+	return as
 }

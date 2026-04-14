@@ -9,9 +9,9 @@ func (s AppState) View() tea.View {
 	var left string
 	mainWidth := s.width
 
-	if !s.sidebar.IsCollapse() {
+	if !s.sidebar.IsCollapsed() {
 		left = s.sidebar.View().Content
-		mainWidth = s.width - s.sidebar.Width
+		mainWidth = s.width - s.sidebar.Dims.Width
 	}
 
 	s.mainbody.SetSize(mainWidth, s.height)

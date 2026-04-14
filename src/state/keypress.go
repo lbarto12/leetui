@@ -1,8 +1,7 @@
 package state
 
 import (
-	"leetui/src/panes/mainbody"
-	"leetui/src/panes/sidebar"
+	"leetui/src/state/focus"
 
 	tea "charm.land/bubbletea/v2"
 )
@@ -12,40 +11,29 @@ func (s AppState) HandleUpdateKeypress(msg tea.KeyPressMsg) (tea.Model, tea.Cmd)
 	case "ctrl+c", "q":
 		return s, tea.Quit
 	case "ctrl+h":
-		if !s.sidebar.IsCollapse() {
-			s.focused = "sidebar"
-			s.sidebar.SetFocused(true)
+		if !s.sidebar.IsCollapsed() {
+			s.focused = focus.Sidebar
 			s.mainbody.SetFocused(false)
+			s.sidebar.SetFocused(true)
 		}
-
 	case "ctrl+l":
-		s.focused = "main"
+		s.focused = focus.Main
 		s.sidebar.SetFocused(false)
 		s.mainbody.SetFocused(true)
 	case "ctrl+e":
 		s.sidebar.ToggleCollapse()
-		if !s.sidebar.IsCollapse() {
+		if !s.sidebar.IsCollapsed() {
+			s.focused = focus.Sidebar
 			s.mainbody.SetFocused(false)
 			s.sidebar.SetFocused(true)
 		} else {
+			s.focused = focus.Main
 			s.sidebar.SetFocused(false)
 			s.mainbody.SetFocused(true)
 		}
 
 	default:
-
-		if s.focused == "sidebar" {
-			updated, cmd := s.sidebar.Update(msg)
-			if m, ok := updated.(sidebar.SidebarModel); ok {
-				s.sidebar = m
-			}
-			return s, cmd
-		}
-		updated, cmd := s.mainbody.Update(msg)
-		if m, ok := updated.(mainbody.MainBodyModel); ok {
-			s.mainbody = m
-		}
-		return s, cmd
+		return s.HandleChildInput(msg)
 	}
 	return s, nil
 }

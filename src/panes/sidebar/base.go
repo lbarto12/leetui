@@ -2,16 +2,19 @@
 package sidebar
 
 import (
+	"log"
+
+	"leetui/src/lib/viewmodel"
+
 	"charm.land/bubbles/v2/textinput"
 	"charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 )
 
 type SidebarModel struct {
-	focused   bool
+	viewmodel.ViewModel
+
 	collapsed bool
-	Width     int
-	height    int
 
 	// components
 	search textinput.Model
@@ -22,11 +25,18 @@ func MakeSidebarModel() SidebarModel {
 	ti.Placeholder = "Find problems..."
 	ti.Prompt = " "
 	ti.CharLimit = 128
-	ti.Focus()
+	// ti.Focus()
 
 	return SidebarModel{
-		Width:  30,
-		search: ti,
+		ViewModel: viewmodel.ViewModel{
+			Focused: false,
+			Dims: viewmodel.ViewModelDims{
+				Width:  30,
+				Height: 0, // inferred elswhere
+			},
+		},
+		collapsed: false,
+		search:    ti,
 	}
 }
 
@@ -35,6 +45,7 @@ func (m SidebarModel) Init() tea.Cmd {
 }
 
 func (m SidebarModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	log.Printf("handle sidebar msg: %v", msg)
 	var cmd tea.Cmd
 	m.search, cmd = m.search.Update(msg)
 	return m, cmd
@@ -42,31 +53,26 @@ func (m SidebarModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m SidebarModel) View() tea.View {
 	borderColor := lipgloss.Color("62")
-	if m.focused {
+	if m.IsFocused() {
 		borderColor = lipgloss.Color("205")
 	}
 
-	m.search.SetWidth(m.Width - 4) // account for border + padding
+	m.search.SetWidth(m.Dims.Width - 4) // account for border + padding
 
 	searchBar := m.search.View()
 	content := searchBar + "\n\n" + "No results."
 
 	style := lipgloss.NewStyle().
-		Width(m.Width).
-		Height(m.height).
+		Width(m.Dims.Width).
+		Height(m.Dims.Height).
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(borderColor)
 
 	return tea.NewView(style.Render(content))
 }
 
-func (m *SidebarModel) SetSize(w, h int) {
-	m.Width = w
-	m.height = h
-}
-
-func (m *SidebarModel) SetFocused(f bool) {
-	m.focused = f
+func (m *SidebarModel) SetFocused(f bool) { // @override
+	m.Focused = f
 	if f {
 		m.search.Focus()
 	} else {
@@ -78,6 +84,6 @@ func (m *SidebarModel) ToggleCollapse() {
 	m.collapsed = !m.collapsed
 }
 
-func (m *SidebarModel) IsCollapse() bool {
+func (m *SidebarModel) IsCollapsed() bool {
 	return m.collapsed
 }
