@@ -5,6 +5,9 @@ import (
 	"leetui/src/panes/mainbody"
 	"leetui/src/panes/sidebar"
 	"leetui/src/state/focus"
+
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 )
 
 type AppState struct {
@@ -24,4 +27,42 @@ func MakeAppState() AppState {
 	}
 
 	return as
+}
+
+func (s AppState) Init() tea.Cmd {
+	return nil
+}
+
+func (s AppState) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	// stats:
+	switch msg := msg.(type) {
+	case tea.KeyPressMsg:
+		return s.HandleUpdateKeypress(msg)
+	case tea.WindowSizeMsg:
+		s.width = msg.Width
+		s.height = msg.Height
+		sidebarWidth := 30
+		mainWidth := msg.Width - sidebarWidth
+		s.sidebar.SetSize(sidebarWidth, msg.Height)
+		s.mainbody.SetSize(mainWidth, msg.Height)
+	}
+
+	return s, nil
+}
+
+func (s AppState) View() tea.View {
+	var left string
+	mainWidth := s.width
+
+	if !s.sidebar.IsCollapsed() {
+		left = s.sidebar.View().Content
+		mainWidth = s.width - s.sidebar.Dims.Width
+	}
+
+	s.mainbody.SetSize(mainWidth, s.height)
+	right := s.mainbody.View().Content
+
+	v := tea.NewView(lipgloss.JoinHorizontal(lipgloss.Top, left, right))
+	v.AltScreen = true
+	return v
 }

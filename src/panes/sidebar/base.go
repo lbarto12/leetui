@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"leetui/src/lib/viewmodel"
+	"leetui/src/panes/sidebar/components"
 
 	"charm.land/bubbles/v2/textinput"
 	"charm.land/bubbletea/v2"
@@ -21,12 +22,6 @@ type SidebarModel struct {
 }
 
 func MakeSidebarModel() SidebarModel {
-	ti := textinput.New()
-	ti.Placeholder = "Find problems..."
-	ti.Prompt = " "
-	ti.CharLimit = 128
-	// ti.Focus()
-
 	return SidebarModel{
 		ViewModel: viewmodel.ViewModel{
 			Focused: false,
@@ -36,7 +31,7 @@ func MakeSidebarModel() SidebarModel {
 			},
 		},
 		collapsed: false,
-		search:    ti,
+		search:    components.ProblemSearchBar(),
 	}
 }
 
