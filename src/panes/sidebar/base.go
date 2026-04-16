@@ -2,6 +2,9 @@
 package sidebar
 
 import (
+	"log"
+
+	"leetui/src/lib/graphqlapi"
 	"leetui/src/lib/viewmodel"
 	"leetui/src/panes/sidebar/components"
 
@@ -19,8 +22,20 @@ type SidebarModel struct {
 	search textinput.Model
 }
 
-func MakeSidebarModel() SidebarModel {
-	return SidebarModel{
+func NewSidebarModel() (*SidebarModel, error) {
+	problems, err := graphqlapi.GetProblems(0, 100, graphqlapi.QuestionGetFilter{
+		SearchKeywords: "generate",
+	})
+	if err != nil {
+		return nil, err
+	}
+	for _, problem := range problems {
+		log.Println(problem)
+	}
+
+	log.Printf("problems: %v", problems)
+
+	return &SidebarModel{
 		ViewModel: viewmodel.ViewModel{
 			Focused: false,
 			Dims: viewmodel.ViewModelDims{
@@ -30,7 +45,7 @@ func MakeSidebarModel() SidebarModel {
 		},
 		collapsed: false,
 		search:    components.ProblemSearchBar(),
-	}
+	}, nil
 }
 
 func (m SidebarModel) Init() tea.Cmd {

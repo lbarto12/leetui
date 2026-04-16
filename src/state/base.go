@@ -2,6 +2,8 @@
 package state
 
 import (
+	"log"
+
 	"leetui/src/panes/mainbody"
 	"leetui/src/panes/sidebar"
 	"leetui/src/state/focus"
@@ -20,9 +22,14 @@ type AppState struct {
 }
 
 func MakeAppState() AppState {
+	sb, err := sidebar.NewSidebarModel()
+	if err != nil {
+		log.Fatalf("could not make sidebar: %v\n", sb)
+	}
+
 	as := AppState{
 		mainbody: mainbody.MakeMainBodyModel(),
-		sidebar:  sidebar.MakeSidebarModel(),
+		sidebar:  *sb,
 		focused:  focus.Main,
 	}
 
