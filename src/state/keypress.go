@@ -1,12 +1,14 @@
 package state
 
 import (
+	"leetui/src/panes/mainbody"
+	"leetui/src/panes/sidebar"
 	"leetui/src/state/focus"
 
 	tea "charm.land/bubbletea/v2"
 )
 
-func (s AppState) HandleUpdateKeypress(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
+func (s AppState) HandleKeypress(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "ctrl+c", "q":
 		return s, tea.Quit
@@ -33,7 +35,16 @@ func (s AppState) HandleUpdateKeypress(msg tea.KeyPressMsg) (tea.Model, tea.Cmd)
 		}
 
 	default:
-		return s.HandleChildInput(msg)
+		switch s.focused {
+		case focus.Main:
+			mb, cmd := s.mainbody.Update(msg)
+			s.mainbody = mb.(mainbody.MainBodyModel)
+			return s, cmd
+		case focus.Sidebar:
+			sb, cmd := s.sidebar.Update(msg)
+			s.sidebar = sb.(sidebar.SidebarModel)
+			return s, cmd
+		}
 	}
 	return s, nil
 }

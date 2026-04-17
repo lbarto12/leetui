@@ -45,39 +45,8 @@ func (m SidebarModel) Init() tea.Cmd {
 
 func (m SidebarModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch m.focusedChild {
-		case focus.SearchBar:
-			switch msg.String() {
-			case "enter":
-				m.search.Blur()
-				m.focusedChild = focus.ProblemList
-				return m, nil
-			default:
-				var cmd1, cmd2 tea.Cmd
-
-				m.search, cmd1 = m.search.Update(msg)
-
-				searchMsg := problemlist.SearchQueryMsg{Query: m.search.Value()}
-				var listModel tea.Model
-				listModel, cmd2 = m.problemlist.Update(searchMsg)
-				m.problemlist = listModel.(problemlist.ProblemlistViewModel)
-				return m, tea.Batch(cmd1, cmd2)
-			}
-
-		case focus.ProblemList:
-			switch msg.String() {
-			case "esc":
-				m.search.Focus()
-				m.focusedChild = focus.SearchBar
-				return m, nil
-			default:
-				pl, cmd := m.problemlist.Update(msg)
-				m.problemlist = pl.(problemlist.ProblemlistViewModel)
-				return m, cmd
-			}
-		}
-
+	case tea.KeyPressMsg:
+		return m.HandleKeypress(msg)
 	case graphqlapi.ProblemsLoadedMsg:
 		listModel, _ := m.problemlist.Update(msg)
 		m.problemlist = listModel.(problemlist.ProblemlistViewModel)

@@ -47,7 +47,7 @@ func (s AppState) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// stats:
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
-		return s.HandleUpdateKeypress(msg)
+		return s.HandleKeypress(msg)
 	case tea.WindowSizeMsg:
 		s.width = msg.Width
 		s.height = msg.Height
