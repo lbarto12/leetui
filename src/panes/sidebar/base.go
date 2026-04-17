@@ -2,11 +2,9 @@
 package sidebar
 
 import (
-	"log"
-
-	"leetui/src/lib/graphqlapi"
 	"leetui/src/lib/viewmodel"
 	"leetui/src/panes/sidebar/components"
+	"leetui/src/panes/sidebar/components/problemlist"
 
 	"charm.land/bubbles/v2/textinput"
 	"charm.land/bubbletea/v2"
@@ -19,32 +17,19 @@ type SidebarModel struct {
 	collapsed bool
 
 	// components
-	search textinput.Model
+	search      textinput.Model
+	problemlist problemlist.ProblemlistViewModel
 }
 
 func NewSidebarModel() (*SidebarModel, error) {
-	problems, err := graphqlapi.GetProblems(0, 100, graphqlapi.QuestionGetFilter{
-		SearchKeywords: "generate",
-	})
-	if err != nil {
-		return nil, err
-	}
-	for _, problem := range problems {
-		log.Println(problem)
-	}
-
-	log.Printf("problems: %v", problems)
-
 	return &SidebarModel{
 		ViewModel: viewmodel.ViewModel{
 			Focused: false,
-			Dims: viewmodel.ViewModelDims{
-				Width:  30,
-				Height: 0, // inferred elswhere
-			},
+			Dims:    viewmodel.ViewModelDims{Width: 30, Height: 0},
 		},
-		collapsed: false,
-		search:    components.ProblemSearchBar(),
+		collapsed:   false,
+		search:      components.ProblemSearchBar(),
+		problemlist: *problemlist.NewProblemListViewModel(),
 	}, nil
 }
 
@@ -53,9 +38,21 @@ func (m SidebarModel) Init() tea.Cmd {
 }
 
 func (m SidebarModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-	m.search, cmd = m.search.Update(msg)
-	return m, cmd
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		var cmd1, cmd2 tea.Cmd
+
+		m.search, cmd1 = m.search.Update(msg)
+
+		searchMsg := problemlist.SearchQueryMsg{Query: m.search.Value()}
+		var listModel tea.Model
+		listModel, cmd2 = m.problemlist.Update(searchMsg)
+		m.problemlist = listModel.(problemlist.ProblemlistViewModel)
+
+		return m, tea.Batch(cmd1, cmd2)
+	}
+
+	return m, nil
 }
 
 func (m SidebarModel) View() tea.View {
@@ -64,10 +61,22 @@ func (m SidebarModel) View() tea.View {
 		borderColor = lipgloss.Color("205")
 	}
 
-	m.search.SetWidth(m.Dims.Width - 4) // account for border + padding
+	innerWidth := m.Dims.Width - 2 // border takes 2 columns
+	m.search.SetWidth(innerWidth - 2)
 
-	searchBar := m.search.View()
-	content := searchBar + "\n\n" + "No results."
+	// Tell the list how much room it has.
+	// search bar = 1 line, blank = 1 line → 2 lines consumed
+	m.problemlist.Dims = viewmodel.ViewModelDims{
+		Width:  innerWidth,
+		Height: m.Dims.Height - 2 - 2, // border + (search + blank)
+	}
+
+	content := lipgloss.JoinVertical(
+		lipgloss.Left,
+		m.search.View(),
+		"",
+		m.problemlist.View().Content,
+	)
 
 	style := lipgloss.NewStyle().
 		Width(m.Dims.Width).
