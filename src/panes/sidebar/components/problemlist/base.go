@@ -92,6 +92,6 @@ func (m ProblemlistViewModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyPressMsg:
 		return m.HandleKeypress(msg)
 	default:
-		return m.PassToChildren(msg)
+		return m.HandleUpdate(msg)
 	}
 }

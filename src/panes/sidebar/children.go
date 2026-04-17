@@ -1,33 +1,20 @@
 package sidebar
 
 import (
-	"leetui/src/lib/graphqlapi"
-	"leetui/src/panes/sidebar/components/problemlist"
-	"leetui/src/panes/sidebar/focus"
+	"leetui/src/lib/chup"
 
-	"charm.land/bubbles/v2/cursor"
-	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"
 )
 
 func (m SidebarModel) PassToChildren(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case graphqlapi.ProblemsLoadedMsg:
-		listModel, _ := m.problemlist.Update(msg)
-		m.problemlist = listModel.(problemlist.ProblemlistViewModel)
+	cmds := []tea.Cmd{}
 
-	case spinner.TickMsg:
-		lm, cmd := m.problemlist.Update(msg)
-		m.problemlist = lm.(problemlist.ProblemlistViewModel)
-		return m, cmd
+	// Manual for external component :(
+	var cmd tea.Cmd
+	m.search, cmd = m.search.Update(msg)
+	cmds = append(cmds, cmd)
 
-	case cursor.BlinkMsg:
-		if m.focusedChild == focus.SearchBar {
-			var cmd tea.Cmd
-			m.search, cmd = m.search.Update(msg)
-			return m, cmd
-		}
-	}
+	cmds = append(cmds, chup.Forward(&m.problemlist, msg))
 
-	return m, nil
+	return m, tea.Batch(cmds...)
 }

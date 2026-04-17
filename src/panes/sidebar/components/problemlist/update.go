@@ -9,7 +9,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 )
 
-func (m ProblemlistViewModel) PassToChildren(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m ProblemlistViewModel) HandleUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case SearchQueryMsg:
 		if m.searchCancel != nil {
