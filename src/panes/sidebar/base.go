@@ -6,6 +6,7 @@ import (
 	"leetui/src/lib/viewmodel"
 	"leetui/src/panes/sidebar/components"
 	"leetui/src/panes/sidebar/components/problemlist"
+	"leetui/src/panes/sidebar/focus"
 
 	"charm.land/bubbles/v2/cursor"
 	"charm.land/bubbles/v2/spinner"
@@ -17,7 +18,8 @@ import (
 type SidebarModel struct {
 	viewmodel.ViewModel
 
-	collapsed bool
+	collapsed    bool
+	focusedChild string
 
 	// components
 	search      textinput.Model
@@ -30,9 +32,10 @@ func NewSidebarModel() (*SidebarModel, error) {
 			Focused: false,
 			Dims:    viewmodel.ViewModelDims{Width: 50, Height: 0},
 		},
-		collapsed:   false,
-		search:      components.ProblemSearchBar(),
-		problemlist: *problemlist.NewProblemListViewModel(),
+		collapsed:    false,
+		focusedChild: focus.SearchBar,
+		search:       components.ProblemSearchBar(),
+		problemlist:  *problemlist.NewProblemListViewModel(),
 	}, nil
 }
 
@@ -43,15 +46,37 @@ func (m SidebarModel) Init() tea.Cmd {
 func (m SidebarModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		var cmd1, cmd2 tea.Cmd
+		switch m.focusedChild {
+		case focus.SearchBar:
+			switch msg.String() {
+			case "enter":
+				m.search.Blur()
+				m.focusedChild = focus.ProblemList
+				return m, nil
+			default:
+				var cmd1, cmd2 tea.Cmd
 
-		m.search, cmd1 = m.search.Update(msg)
+				m.search, cmd1 = m.search.Update(msg)
 
-		searchMsg := problemlist.SearchQueryMsg{Query: m.search.Value()}
-		var listModel tea.Model
-		listModel, cmd2 = m.problemlist.Update(searchMsg)
-		m.problemlist = listModel.(problemlist.ProblemlistViewModel)
-		return m, tea.Batch(cmd1, cmd2)
+				searchMsg := problemlist.SearchQueryMsg{Query: m.search.Value()}
+				var listModel tea.Model
+				listModel, cmd2 = m.problemlist.Update(searchMsg)
+				m.problemlist = listModel.(problemlist.ProblemlistViewModel)
+				return m, tea.Batch(cmd1, cmd2)
+			}
+
+		case focus.ProblemList:
+			switch msg.String() {
+			case "esc":
+				m.search.Focus()
+				m.focusedChild = focus.SearchBar
+				return m, nil
+			default:
+				pl, cmd := m.problemlist.Update(msg)
+				m.problemlist = pl.(problemlist.ProblemlistViewModel)
+				return m, cmd
+			}
+		}
 
 	case graphqlapi.ProblemsLoadedMsg:
 		listModel, _ := m.problemlist.Update(msg)
@@ -63,9 +88,11 @@ func (m SidebarModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 
 	case cursor.BlinkMsg:
-		var cmd tea.Cmd
-		m.search, cmd = m.search.Update(msg)
-		return m, cmd
+		if m.focusedChild == focus.SearchBar {
+			var cmd tea.Cmd
+			m.search, cmd = m.search.Update(msg)
+			return m, cmd
+		}
 	}
 
 	return m, nil
@@ -80,8 +107,6 @@ func (m SidebarModel) View() tea.View {
 	innerWidth := m.Dims.Width - 2 // border takes 2 columns
 	m.search.SetWidth(innerWidth - 2)
 
-	// Tell the list how much room it has.
-	// search bar = 1 line, blank = 1 line → 2 lines consumed
 	m.problemlist.Dims = viewmodel.ViewModelDims{
 		Width:  innerWidth,
 		Height: m.Dims.Height - 2 - 2, // border + (search + blank)
@@ -105,11 +130,7 @@ func (m SidebarModel) View() tea.View {
 
 func (m *SidebarModel) SetFocused(f bool) { // @override
 	m.Focused = f
-	if f {
-		m.search.Focus()
-	} else {
-		m.search.Blur()
-	}
+	m.search.Focus()
 }
 
 func (m *SidebarModel) ToggleCollapse() {

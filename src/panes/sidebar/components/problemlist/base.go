@@ -89,6 +89,11 @@ type SearchQueryMsg struct{ Query string }
 
 func (m ProblemlistViewModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		// switch on directionality
+		}
+
 	case SearchQueryMsg:
 		if m.searchCancel != nil {
 			return m, nil
