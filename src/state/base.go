@@ -9,6 +9,7 @@ import (
 	"leetui/src/panes/sidebar"
 	"leetui/src/state/focus"
 
+	"charm.land/bubbles/v2/cursor"
 	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
@@ -59,6 +60,11 @@ func (s AppState) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case graphqlapi.ProblemsLoadedMsg:
 		sb, _ := s.sidebar.Update(msg)
 		s.sidebar = sb.(sidebar.SidebarModel)
+
+	case cursor.BlinkMsg:
+		sb, cmd := s.sidebar.Update(msg)
+		s.sidebar = sb.(sidebar.SidebarModel)
+		return s, cmd
 
 	// All loading spinners
 	case spinner.TickMsg:

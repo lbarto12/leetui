@@ -56,7 +56,7 @@ func (m ProblemlistViewModel) View() tea.View {
 
 	var content string
 	if m.loading {
-		content = m.loadingSpinner.View() + "searching..."
+		content = m.loadingSpinner.View() + " searching..."
 	} else if len(m.problems) == 0 {
 		content = "no results."
 	} else {
@@ -110,9 +110,11 @@ func (m ProblemlistViewModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case spinner.TickMsg:
-		var cmd tea.Cmd
-		m.loadingSpinner, cmd = m.loadingSpinner.Update(msg)
-		return m, cmd
+		if msg.ID == m.loadingSpinner.ID() {
+			var cmd tea.Cmd
+			m.loadingSpinner, cmd = m.loadingSpinner.Update(msg)
+			return m, cmd
+		}
 	}
 
 	return m, nil

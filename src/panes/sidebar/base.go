@@ -7,6 +7,7 @@ import (
 	"leetui/src/panes/sidebar/components"
 	"leetui/src/panes/sidebar/components/problemlist"
 
+	"charm.land/bubbles/v2/cursor"
 	"charm.land/bubbles/v2/spinner"
 	"charm.land/bubbles/v2/textinput"
 	"charm.land/bubbletea/v2"
@@ -50,16 +51,20 @@ func (m SidebarModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		var listModel tea.Model
 		listModel, cmd2 = m.problemlist.Update(searchMsg)
 		m.problemlist = listModel.(problemlist.ProblemlistViewModel)
-
 		return m, tea.Batch(cmd1, cmd2)
+
 	case graphqlapi.ProblemsLoadedMsg:
 		listModel, _ := m.problemlist.Update(msg)
 		m.problemlist = listModel.(problemlist.ProblemlistViewModel)
-		// m.problemlist.View()
 
 	case spinner.TickMsg:
 		lm, cmd := m.problemlist.Update(msg)
 		m.problemlist = lm.(problemlist.ProblemlistViewModel)
+		return m, cmd
+
+	case cursor.BlinkMsg:
+		var cmd tea.Cmd
+		m.search, cmd = m.search.Update(msg)
 		return m, cmd
 	}
 
