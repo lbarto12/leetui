@@ -9,6 +9,7 @@ import (
 	"leetui/src/panes/sidebar"
 	"leetui/src/state/focus"
 
+	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 )
@@ -38,7 +39,7 @@ func MakeAppState() AppState {
 }
 
 func (s AppState) Init() tea.Cmd {
-	return nil
+	return tea.Batch(s.sidebar.Init(), s.mainbody.Init())
 }
 
 func (s AppState) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -54,9 +55,20 @@ func (s AppState) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		s.sidebar.SetSize(s.sidebar.GetSize().Width, msg.Height)
 		s.mainbody.SetSize(msg.Width-s.sidebar.GetSize().Width, msg.Height)
 
+	// Child passthrough
 	case graphqlapi.ProblemsLoadedMsg:
 		sb, _ := s.sidebar.Update(msg)
 		s.sidebar = sb.(sidebar.SidebarModel)
+
+	// All loading spinners
+	case spinner.TickMsg:
+		sb, cmd1 := s.sidebar.Update(msg)
+		s.sidebar = sb.(sidebar.SidebarModel)
+
+		mb, cmd2 := s.mainbody.Update(msg)
+		s.mainbody = mb.(mainbody.MainBodyModel)
+
+		return s, tea.Batch(cmd1, cmd2)
 	}
 
 	return s, nil

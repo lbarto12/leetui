@@ -11,15 +11,17 @@ import (
 	"leetui/src/lib/graphqlapi/models"
 	"leetui/src/lib/viewmodel"
 
+	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 )
 
 type ProblemlistViewModel struct {
 	viewmodel.ViewModel
-	problems     []models.Problem
-	searchCancel context.CancelFunc
-	loading      bool
+	problems       []models.Problem
+	searchCancel   context.CancelFunc
+	loading        bool
+	loadingSpinner spinner.Model
 }
 
 func NewProblemListViewModel() *ProblemlistViewModel {
@@ -27,6 +29,11 @@ func NewProblemListViewModel() *ProblemlistViewModel {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	problemLoadingSpinner := spinner.New()
+	problemLoadingSpinner.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("69"))
+	problemLoadingSpinner.Spinner = spinner.Dot
+
 	return &ProblemlistViewModel{
 		ViewModel: viewmodel.ViewModel{
 			Focused: false,
@@ -35,12 +42,13 @@ func NewProblemListViewModel() *ProblemlistViewModel {
 				Height: 30,
 			},
 		},
-		problems: problems,
+		problems:       problems,
+		loadingSpinner: problemLoadingSpinner,
 	}
 }
 
 func (m ProblemlistViewModel) Init() tea.Cmd {
-	return nil
+	return m.loadingSpinner.Tick
 }
 
 func (m ProblemlistViewModel) View() tea.View {
@@ -48,9 +56,9 @@ func (m ProblemlistViewModel) View() tea.View {
 
 	var content string
 	if m.loading {
-		content = "searching..."
+		content = m.loadingSpinner.View() + "searching..."
 	} else if len(m.problems) == 0 {
-		content = "(no results)"
+		content = "no results."
 	} else {
 		var lines []string
 		for _, p := range m.problems {
@@ -100,6 +108,11 @@ func (m ProblemlistViewModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.problems = msg.Problems
 		}
 		return m, nil
+
+	case spinner.TickMsg:
+		var cmd tea.Cmd
+		m.loadingSpinner, cmd = m.loadingSpinner.Update(msg)
+		return m, cmd
 	}
 
 	return m, nil
