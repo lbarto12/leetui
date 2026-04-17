@@ -2,6 +2,7 @@
 package sidebar
 
 import (
+	"leetui/src/lib/graphqlapi"
 	"leetui/src/lib/viewmodel"
 	"leetui/src/panes/sidebar/components"
 	"leetui/src/panes/sidebar/components/problemlist"
@@ -50,6 +51,10 @@ func (m SidebarModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.problemlist = listModel.(problemlist.ProblemlistViewModel)
 
 		return m, tea.Batch(cmd1, cmd2)
+	case graphqlapi.ProblemsLoadedMsg:
+		listModel, _ := m.problemlist.Update(msg)
+		m.problemlist = listModel.(problemlist.ProblemlistViewModel)
+		m.problemlist.View()
 	}
 
 	return m, nil

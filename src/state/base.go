@@ -4,6 +4,7 @@ package state
 import (
 	"log"
 
+	"leetui/src/lib/graphqlapi"
 	"leetui/src/panes/mainbody"
 	"leetui/src/panes/sidebar"
 	"leetui/src/state/focus"
@@ -52,6 +53,10 @@ func (s AppState) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		mainWidth := msg.Width - sidebarWidth
 		s.sidebar.SetSize(sidebarWidth, msg.Height)
 		s.mainbody.SetSize(mainWidth, msg.Height)
+
+	case graphqlapi.ProblemsLoadedMsg:
+		sb, _ := s.sidebar.Update(msg)
+		s.sidebar = sb.(sidebar.SidebarModel)
 	}
 
 	return s, nil

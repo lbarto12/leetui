@@ -2,6 +2,7 @@
 package problemlist
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -16,10 +17,16 @@ import (
 
 type ProblemlistViewModel struct {
 	viewmodel.ViewModel
-	problems []models.Problem
+	problems     []models.Problem
+	searchCancel context.CancelFunc
+	loading      bool
 }
 
 func NewProblemListViewModel() *ProblemlistViewModel {
+	problems, err := graphqlapi.GetProblemsRaw(context.Background(), 0, 25, graphqlapi.QuestionGetFilter{})
+	if err != nil {
+		log.Fatal(err)
+	}
 	return &ProblemlistViewModel{
 		ViewModel: viewmodel.ViewModel{
 			Focused: false,
@@ -28,28 +35,23 @@ func NewProblemListViewModel() *ProblemlistViewModel {
 				Height: 30,
 			},
 		},
+		problems: problems,
 	}
 }
 
 func (m ProblemlistViewModel) Init() tea.Cmd {
-	// problems, err := graphqlapi.GetProblems(0, 100, graphqlapi.QuestionGetFilter{
-	// 	SearchKeywords: "generate",
-	// })
-	// if err != nil {
-	// 	return nil
-	// }
-	// m.problems = problems
 	return nil
 }
 
 func (m ProblemlistViewModel) View() tea.View {
-	innerWidth := m.Dims.Width
-	if innerWidth < 10 {
-		innerWidth = 10
-	}
+	innerWidth := max(m.Dims.Width, 10)
 
-	content := "(no results)"
-	if len(m.problems) > 0 {
+	var content string
+	if m.loading {
+		content = "searching..."
+	} else if len(m.problems) == 0 {
+		content = "(no results)"
+	} else {
 		var lines []string
 		for _, p := range m.problems {
 			line := fmt.Sprintf("%4s [%-6s] %s", p.ID, p.Difficulty, p.Title)
@@ -80,21 +82,24 @@ type SearchQueryMsg struct{ Query string }
 func (m ProblemlistViewModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case SearchQueryMsg:
+		if m.searchCancel != nil {
+			return m, nil
+		}
 
-		problems, err := graphqlapi.GetProblems(0, 25, graphqlapi.QuestionGetFilter{
+		ctx, cancel := context.WithCancel(context.Background())
+		m.loading = true
+		m.searchCancel = cancel
+		return m, graphqlapi.GetProblems(ctx, 0, 25, graphqlapi.QuestionGetFilter{
 			SearchKeywords: msg.Query,
 		})
-		if err != nil {
-			log.Fatal(err)
+
+	case graphqlapi.ProblemsLoadedMsg:
+		m.loading = false
+		m.searchCancel = nil
+		if msg.Err == nil {
+			m.problems = msg.Problems
 		}
-		m.problems = problems
-
-		log.Printf("found new problems: %v\n", m.problems)
-
-		// m.search.Update(msg
-		//
-		// m.search, cmd = m.search.Update(msg)
-		// return m, cmd
+		return m, nil
 	}
 
 	return m, nil
