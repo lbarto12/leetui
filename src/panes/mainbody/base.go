@@ -24,23 +24,28 @@ func MakeMainBodyModel() MainBodyModel {
 	}
 }
 
-func (model MainBodyModel) Init() tea.Cmd {
+func (m MainBodyModel) Init() tea.Cmd {
 	return nil
 }
 
-func (model MainBodyModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	return model, nil
+func (m MainBodyModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyPressMsg:
+		return m.HandleKeypress(msg)
+	default:
+		return m.PassToChildren(msg)
+	}
 }
 
-func (model MainBodyModel) View() tea.View {
+func (m MainBodyModel) View() tea.View {
 	borderColor := lipgloss.Color("62")
-	if model.IsFocused() {
+	if m.IsFocused() {
 		borderColor = lipgloss.Color("205")
 	}
 
 	style := lipgloss.NewStyle().
-		Width(model.Dims.Width).
-		Height(model.Dims.Height).
+		Width(m.Dims.Width).
+		Height(m.Dims.Height).
 		Align(lipgloss.Center, lipgloss.Center).
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(borderColor)

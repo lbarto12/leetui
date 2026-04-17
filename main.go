@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"leetui/src/app"
 	"leetui/src/lib/graphqlapi"
-	"leetui/src/state"
 
 	tea "charm.land/bubbletea/v2"
 )
@@ -20,7 +20,7 @@ func main() {
 
 	graphqlapi.InitLeetcodeGraphQLClient()
 
-	p := tea.NewProgram(state.MakeAppState())
+	p := tea.NewProgram(app.MakeAppState())
 
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)

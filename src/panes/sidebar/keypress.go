@@ -1,6 +1,11 @@
 package sidebar
 
-import tea "charm.land/bubbletea/v2"
+import (
+	"leetui/src/panes/sidebar/components/problemlist"
+	"leetui/src/panes/sidebar/focus"
+
+	tea "charm.land/bubbletea/v2"
+)
 
 func (m SidebarModel) HandleKeypress(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	switch m.focusedChild {

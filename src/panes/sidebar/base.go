@@ -2,14 +2,11 @@
 package sidebar
 
 import (
-	"leetui/src/lib/graphqlapi"
 	"leetui/src/lib/viewmodel"
 	"leetui/src/panes/sidebar/components"
 	"leetui/src/panes/sidebar/components/problemlist"
 	"leetui/src/panes/sidebar/focus"
 
-	"charm.land/bubbles/v2/cursor"
-	"charm.land/bubbles/v2/spinner"
 	"charm.land/bubbles/v2/textinput"
 	"charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
@@ -47,24 +44,9 @@ func (m SidebarModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
 		return m.HandleKeypress(msg)
-	case graphqlapi.ProblemsLoadedMsg:
-		listModel, _ := m.problemlist.Update(msg)
-		m.problemlist = listModel.(problemlist.ProblemlistViewModel)
-
-	case spinner.TickMsg:
-		lm, cmd := m.problemlist.Update(msg)
-		m.problemlist = lm.(problemlist.ProblemlistViewModel)
-		return m, cmd
-
-	case cursor.BlinkMsg:
-		if m.focusedChild == focus.SearchBar {
-			var cmd tea.Cmd
-			m.search, cmd = m.search.Update(msg)
-			return m, cmd
-		}
+	default:
+		return m.PassToChildren(msg)
 	}
-
-	return m, nil
 }
 
 func (m SidebarModel) View() tea.View {
@@ -95,17 +77,4 @@ func (m SidebarModel) View() tea.View {
 		BorderForeground(borderColor)
 
 	return tea.NewView(style.Render(content))
-}
-
-func (m *SidebarModel) SetFocused(f bool) { // @override
-	m.Focused = f
-	m.search.Focus()
-}
-
-func (m *SidebarModel) ToggleCollapse() {
-	m.collapsed = !m.collapsed
-}
-
-func (m *SidebarModel) IsCollapsed() bool {
-	return m.collapsed
 }

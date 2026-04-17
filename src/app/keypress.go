@@ -1,9 +1,9 @@
-package state
+package app
 
 import (
+	"leetui/src/app/focus"
 	"leetui/src/panes/mainbody"
 	"leetui/src/panes/sidebar"
-	"leetui/src/state/focus"
 
 	tea "charm.land/bubbletea/v2"
 )
