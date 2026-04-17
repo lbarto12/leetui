@@ -26,7 +26,7 @@ func NewSidebarModel() (*SidebarModel, error) {
 	return &SidebarModel{
 		ViewModel: viewmodel.ViewModel{
 			Focused: false,
-			Dims:    viewmodel.ViewModelDims{Width: 30, Height: 0},
+			Dims:    viewmodel.ViewModelDims{Width: 50, Height: 0},
 		},
 		collapsed:   false,
 		search:      components.ProblemSearchBar(),

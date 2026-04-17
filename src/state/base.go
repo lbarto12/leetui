@@ -49,10 +49,10 @@ func (s AppState) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		s.width = msg.Width
 		s.height = msg.Height
-		sidebarWidth := 30
-		mainWidth := msg.Width - sidebarWidth
-		s.sidebar.SetSize(sidebarWidth, msg.Height)
-		s.mainbody.SetSize(mainWidth, msg.Height)
+
+		// Set children sizes on resize
+		s.sidebar.SetSize(s.sidebar.GetSize().Width, msg.Height)
+		s.mainbody.SetSize(msg.Width-s.sidebar.GetSize().Width, msg.Height)
 
 	case graphqlapi.ProblemsLoadedMsg:
 		sb, _ := s.sidebar.Update(msg)
