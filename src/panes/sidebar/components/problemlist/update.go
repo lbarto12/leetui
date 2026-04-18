@@ -6,9 +6,10 @@ import (
 	"leetui/src/lib/graphqlapi"
 
 	"charm.land/bubbles/v2/spinner"
-	"charm.land/bubbles/v2/table"
 	tea "charm.land/bubbletea/v2"
 )
+
+type SearchQueryMsg struct{ Query string }
 
 func (m ProblemlistViewModel) HandleUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
@@ -36,13 +37,7 @@ func (m ProblemlistViewModel) HandleUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.problems = msg.Problems
 		}
 
-		ptabledata := []table.Row{}
-		for _, problem := range m.problems {
-			ptabledata = append(ptabledata, table.Row{
-				problem.ID, problem.Difficulty, problem.Title,
-			})
-		}
-
+		ptabledata := ConvertProblemsToTableRows(m.problems)
 		m.table.SetRows(ptabledata)
 
 		return m, nil

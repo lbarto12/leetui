@@ -18,6 +18,7 @@ type SidebarModel struct {
 
 	collapsed    bool
 	focusedChild string
+	styles       Styles
 
 	// components
 	search      textinput.Model
@@ -32,6 +33,7 @@ func NewSidebarModel() (*SidebarModel, error) {
 		},
 		collapsed:    false,
 		focusedChild: focus.SearchBar,
+		styles:       MakeStyles(),
 		search:       components.ProblemSearchBar(),
 		problemlist:  *problemlist.NewProblemListViewModel(),
 	}, nil
@@ -55,9 +57,9 @@ func (m SidebarModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m SidebarModel) View() tea.View {
-	borderColor := lipgloss.Color("62")
+	borderColor := m.styles.borderColor
 	if m.IsFocused() {
-		borderColor = lipgloss.Color("205")
+		borderColor = m.styles.focusedBorderColor
 	}
 
 	innerWidth := m.Dims.Width - 2 // border takes 2 columns
@@ -78,7 +80,7 @@ func (m SidebarModel) View() tea.View {
 	style := lipgloss.NewStyle().
 		Width(m.Dims.Width).
 		Height(m.Dims.Height).
-		Border(lipgloss.RoundedBorder()).
+		Border(m.styles.border).
 		BorderForeground(borderColor)
 
 	return tea.NewView(style.Render(content))

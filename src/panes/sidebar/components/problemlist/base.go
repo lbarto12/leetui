@@ -12,21 +12,21 @@ import (
 	"charm.land/bubbles/v2/spinner"
 	"charm.land/bubbles/v2/table"
 	tea "charm.land/bubbletea/v2"
-	"charm.land/lipgloss/v2"
 )
 
 type ProblemlistViewModel struct {
 	viewmodel.ViewModel
+	styles         Styles
 	problems       []models.Problem
 	searchCancel   context.CancelFunc
 	loading        bool
 	loadingSpinner spinner.Model
 	table          table.Model
-	tableStyles    table.Styles
-	selectedStyle  lipgloss.Style
 }
 
 func NewProblemListViewModel() *ProblemlistViewModel {
+	styles := MakeStyles()
+
 	problems, err := graphqlapi.GetProblemsRaw(context.Background(), 0, 300, graphqlapi.QuestionGetFilter{})
 	if err != nil {
 		log.Fatal(err)
@@ -34,12 +34,7 @@ func NewProblemListViewModel() *ProblemlistViewModel {
 
 	// Problem Table
 
-	ptabledata := []table.Row{}
-	for _, problem := range problems {
-		ptabledata = append(ptabledata, table.Row{
-			problem.ID, problem.Difficulty, problem.Title,
-		})
-	}
+	ptabledata := ConvertProblemsToTableRows(problems)
 
 	ptable := table.New(
 		table.WithColumns([]table.Column{
@@ -49,27 +44,12 @@ func NewProblemListViewModel() *ProblemlistViewModel {
 		}),
 		table.WithRows(ptabledata),
 		table.WithFocused(false),
+		table.WithStyles(styles.tableStyles),
 	)
-
-	s := table.DefaultStyles()
-	s.Header = s.Header.
-		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color("240")).
-		BorderBottom(true).
-		Bold(false)
-	selectedStyle := s.Selected.
-		Foreground(lipgloss.Color("229")).
-		Background(lipgloss.Color("57")).
-		Bold(false)
-	// Start with no highlight since table starts unfocused
-	baseStyles := s
-	s.Selected = lipgloss.NewStyle()
-	ptable.SetStyles(s)
-	baseStyles.Selected = selectedStyle
 
 	// Spinner
 	problemLoadingSpinner := spinner.New()
-	problemLoadingSpinner.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("69"))
+	problemLoadingSpinner.Style = styles.spinnerStyle
 	problemLoadingSpinner.Spinner = spinner.Dot
 
 	return &ProblemlistViewModel{
@@ -83,8 +63,7 @@ func NewProblemListViewModel() *ProblemlistViewModel {
 		problems:       problems,
 		loadingSpinner: problemLoadingSpinner,
 		table:          ptable,
-		tableStyles:    baseStyles,
-		selectedStyle:  selectedStyle,
+		styles:         styles,
 	}
 }
 
@@ -116,8 +95,6 @@ func (m ProblemlistViewModel) View() tea.View {
 	return tea.NewView(content)
 }
 
-type SearchQueryMsg struct{ Query string }
-
 func (m ProblemlistViewModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
@@ -129,17 +106,4 @@ func (m ProblemlistViewModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *ProblemlistViewModel) GotoTop() {
 	m.table.GotoTop()
-}
-
-func (m *ProblemlistViewModel) SetFocused(focused bool) { // @override
-	m.Focused = focused
-	s := m.tableStyles
-	if m.Focused {
-		m.table.Focus()
-		s.Selected = m.selectedStyle
-	} else {
-		m.table.Blur()
-		s.Selected = lipgloss.NewStyle()
-	}
-	m.table.SetStyles(s)
 }
