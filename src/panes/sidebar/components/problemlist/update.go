@@ -3,13 +3,12 @@ package problemlist
 import (
 	"context"
 
+	"leetui/src/lib/common/cmds"
 	"leetui/src/lib/graphqlapi"
 
 	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"
 )
-
-type SearchQueryMsg struct{ Query string }
 
 func (m ProblemlistViewModel) HandleUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
@@ -18,7 +17,7 @@ func (m ProblemlistViewModel) HandleUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.table.SetWidth(m.GetSize().Width)
 		m.table.SetHeight(m.GetSize().Height)
 		return m, nil
-	case SearchQueryMsg:
+	case cmds.SearchQueryMsg:
 		if m.searchCancel != nil {
 			return m, nil
 		}

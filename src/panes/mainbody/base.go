@@ -2,6 +2,9 @@
 package mainbody
 
 import (
+	"encoding/json"
+
+	"leetui/src/lib/graphqlapi/models"
 	"leetui/src/lib/viewmodel"
 
 	tea "charm.land/bubbletea/v2"
@@ -10,6 +13,9 @@ import (
 
 type MainBodyModel struct {
 	viewmodel.ViewModel
+	styles                 Styles
+	selectedProblem        string // Simple ID
+	selectedProblemDetails models.ProblemDetails
 }
 
 func MakeMainBodyModel() MainBodyModel {
@@ -21,6 +27,8 @@ func MakeMainBodyModel() MainBodyModel {
 				Height: 0,
 			},
 		},
+		styles:          MakeStyles(),
+		selectedProblem: "Select a problem to see it here",
 	}
 }
 
@@ -33,7 +41,7 @@ func (m MainBodyModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyPressMsg:
 		return m.HandleKeypress(msg)
 	default:
-		return m.PassToChildren(msg)
+		return m.HandleUpdate(msg)
 	}
 }
 
@@ -50,5 +58,7 @@ func (m MainBodyModel) View() tea.View {
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(borderColor)
 
-	return tea.NewView(style.Render("Main Body"))
+	marshalled, _ := json.Marshal(m.selectedProblemDetails)
+
+	return tea.NewView(style.Render(string(marshalled)))
 }

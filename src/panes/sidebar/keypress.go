@@ -1,6 +1,7 @@
 package sidebar
 
 import (
+	"leetui/src/lib/common/cmds"
 	"leetui/src/panes/sidebar/components/problemlist"
 	"leetui/src/panes/sidebar/focus"
 
@@ -12,17 +13,19 @@ func (m SidebarModel) HandleKeypress(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	case focus.SearchBar:
 		switch msg.String() {
 		case "enter":
-			m.search.Blur()
-			m.focusedChild = focus.ProblemList
+			if m.problemlist.HasProblemsAvailable() {
+				m.search.Blur()
+				m.focusedChild = focus.ProblemList
 
-			m.problemlist.SetFocused(true)
+				m.problemlist.SetFocused(true)
+			}
 			return m, nil
 		default:
 			var cmd1, cmd2 tea.Cmd
 
 			m.search, cmd1 = m.search.Update(msg)
 
-			searchMsg := problemlist.SearchQueryMsg{Query: m.search.Value()}
+			searchMsg := cmds.SearchQueryMsg{Query: m.search.Value()}
 			var listModel tea.Model
 			listModel, cmd2 = m.problemlist.Update(searchMsg)
 			m.problemlist = listModel.(problemlist.ProblemlistViewModel)

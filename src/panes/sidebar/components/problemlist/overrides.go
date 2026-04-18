@@ -14,3 +14,7 @@ func (m *ProblemlistViewModel) SetFocused(focused bool) { // @override
 	}
 	m.table.SetStyles(s)
 }
+
+func (m ProblemlistViewModel) HasProblemsAvailable() bool {
+	return len(m.problems) > 0
+}
