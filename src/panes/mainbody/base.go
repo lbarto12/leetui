@@ -2,12 +2,14 @@
 package mainbody
 
 import (
-	"encoding/json"
+	"fmt"
 
 	"leetui/src/lib/graphqlapi/models"
 	"leetui/src/lib/viewmodel"
+	"leetui/src/panes/mainbody/components/pages"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 )
 
 type MainBodyModel struct {
@@ -15,6 +17,7 @@ type MainBodyModel struct {
 	styles                 Styles
 	selectedProblem        string // Simple ID
 	selectedProblemDetails models.ProblemDetails
+	children               Children
 }
 
 func MakeMainBodyModel() MainBodyModel {
@@ -28,11 +31,16 @@ func MakeMainBodyModel() MainBodyModel {
 		},
 		styles:          MakeStyles(),
 		selectedProblem: "Select a problem to see it here",
+		children: Children{
+			pages: pages.MakeMainBodyPagesModel(),
+		},
 	}
 }
 
 func (m MainBodyModel) Init() tea.Cmd {
-	return nil
+	return tea.Batch(
+		m.children.pages.Init(),
+	)
 }
 
 func (m MainBodyModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -45,9 +53,20 @@ func (m MainBodyModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m MainBodyModel) View() tea.View {
-	marshalled, _ := json.Marshal(m.selectedProblemDetails)
+	bodyStyle := m.styles.body(m)
+	// marshalled, _ := json.Marshal(m.selectedProblemDetails)
 
-	style := m.styles.body(m)
+	titleStyle := m.styles.title(m)
 
-	return tea.NewView(style.Render(string(marshalled)))
+	view := bodyStyle.Render(lipgloss.JoinVertical(
+		lipgloss.Top,
+
+		// Title bar
+		titleStyle.Render(fmt.Sprintf("%s - %s", m.selectedProblemDetails.ID, m.selectedProblemDetails.Title)),
+
+		// Page
+		m.children.pages.View().Content,
+	))
+
+	return tea.NewView(view)
 }

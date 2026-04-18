@@ -9,6 +9,10 @@ import (
 
 func (m MainBodyModel) HandleUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.SetSize(m.GetSize().Width, msg.Height)
+		m.PassToChildren(msg)
+		return m, nil
 	case cmds.SelectProblemMsg:
 		m.selectedProblem = msg.ProblemID
 		return m, nil

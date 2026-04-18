@@ -1,12 +1,18 @@
 package mainbody
 
 import (
+	"leetui/src/lib/chup"
+	"leetui/src/panes/mainbody/components/pages"
+
 	tea "charm.land/bubbletea/v2"
 )
 
-func (m MainBodyModel) PassToChildren(msg tea.Msg) (tea.Model, tea.Cmd) {
-	// switch msg := msg.(type) {
-	// }
+type Children struct {
+	pages pages.MainBodyPagesModel
+}
 
-	return m, nil
+func (m MainBodyModel) PassToChildren(msg tea.Msg) (tea.Model, tea.Cmd) {
+	return m, tea.Batch(
+		chup.Forward(&m.children.pages, msg),
+	)
 }
