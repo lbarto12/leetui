@@ -6,11 +6,17 @@ import (
 	"leetui/src/lib/graphqlapi"
 
 	"charm.land/bubbles/v2/spinner"
+	"charm.land/bubbles/v2/table"
 	tea "charm.land/bubbletea/v2"
 )
 
 func (m ProblemlistViewModel) HandleUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.SetSize(m.GetSize().Width, msg.Height-4)
+		m.table.SetWidth(m.GetSize().Width)
+		m.table.SetHeight(m.GetSize().Height)
+		return m, nil
 	case SearchQueryMsg:
 		if m.searchCancel != nil {
 			return m, nil
@@ -19,7 +25,7 @@ func (m ProblemlistViewModel) HandleUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 		ctx, cancel := context.WithCancel(context.Background())
 		m.loading = true
 		m.searchCancel = cancel
-		return m, graphqlapi.GetProblems(ctx, 0, 25, graphqlapi.QuestionGetFilter{
+		return m, graphqlapi.GetProblems(ctx, 0, 300, graphqlapi.QuestionGetFilter{
 			SearchKeywords: msg.Query,
 		})
 
@@ -29,6 +35,16 @@ func (m ProblemlistViewModel) HandleUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.Err == nil {
 			m.problems = msg.Problems
 		}
+
+		ptabledata := []table.Row{}
+		for _, problem := range m.problems {
+			ptabledata = append(ptabledata, table.Row{
+				problem.ID, problem.Difficulty, problem.Title,
+			})
+		}
+
+		m.table.SetRows(ptabledata)
+
 		return m, nil
 
 	case spinner.TickMsg:

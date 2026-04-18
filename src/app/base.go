@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"leetui/src/app/focus"
+	"leetui/src/lib/chup"
 	"leetui/src/panes/mainbody"
 	"leetui/src/panes/sidebar"
 
@@ -49,8 +50,11 @@ func (s AppState) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		s.width = msg.Width
 		s.height = msg.Height
 
+		chup.Forward(&s.sidebar, msg)
+		chup.Forward(&s.mainbody, msg)
+
 		// Set children sizes on resize
-		s.sidebar.SetSize(s.sidebar.GetSize().Width, msg.Height)
+		// s.sidebar.SetSize(s.sidebar.GetSize().Width, msg.Height)
 		s.mainbody.SetSize(msg.Width-s.sidebar.GetSize().Width, msg.Height)
 	default:
 		return s.PassToChildren(msg)

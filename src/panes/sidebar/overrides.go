@@ -1,10 +1,7 @@
 package sidebar
 
-import "leetui/src/panes/sidebar/focus"
-
 func (m *SidebarModel) SetFocused(f bool) { // @override
 	m.Focused = f
-	m.focusedChild = focus.SearchBar
 	m.search.Focus()
 }
 

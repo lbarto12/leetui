@@ -14,6 +14,8 @@ func (m SidebarModel) HandleKeypress(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 		case "enter":
 			m.search.Blur()
 			m.focusedChild = focus.ProblemList
+
+			m.problemlist.SetFocused(true)
 			return m, nil
 		default:
 			var cmd1, cmd2 tea.Cmd
@@ -32,6 +34,8 @@ func (m SidebarModel) HandleKeypress(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 		case "esc":
 			m.search.Focus()
 			m.focusedChild = focus.SearchBar
+			m.problemlist.SetFocused(false)
+			m.problemlist.GotoTop()
 			return m, nil
 		default:
 			pl, cmd := m.problemlist.Update(msg)

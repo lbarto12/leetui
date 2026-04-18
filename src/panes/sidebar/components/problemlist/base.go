@@ -3,15 +3,14 @@ package problemlist
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"strings"
 
 	"leetui/src/lib/graphqlapi"
 	"leetui/src/lib/graphqlapi/models"
 	"leetui/src/lib/viewmodel"
 
 	"charm.land/bubbles/v2/spinner"
+	"charm.land/bubbles/v2/table"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 )
@@ -22,14 +21,53 @@ type ProblemlistViewModel struct {
 	searchCancel   context.CancelFunc
 	loading        bool
 	loadingSpinner spinner.Model
+	table          table.Model
+	tableStyles    table.Styles
+	selectedStyle  lipgloss.Style
 }
 
 func NewProblemListViewModel() *ProblemlistViewModel {
-	problems, err := graphqlapi.GetProblemsRaw(context.Background(), 0, 25, graphqlapi.QuestionGetFilter{})
+	problems, err := graphqlapi.GetProblemsRaw(context.Background(), 0, 300, graphqlapi.QuestionGetFilter{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Problem Table
+
+	ptabledata := []table.Row{}
+	for _, problem := range problems {
+		ptabledata = append(ptabledata, table.Row{
+			problem.ID, problem.Difficulty, problem.Title,
+		})
+	}
+
+	ptable := table.New(
+		table.WithColumns([]table.Column{
+			{Title: "#", Width: 4},
+			{Title: "Diff", Width: 6},
+			{Title: "Title", Width: 20},
+		}),
+		table.WithRows(ptabledata),
+		table.WithFocused(false),
+	)
+
+	s := table.DefaultStyles()
+	s.Header = s.Header.
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color("240")).
+		BorderBottom(true).
+		Bold(false)
+	selectedStyle := s.Selected.
+		Foreground(lipgloss.Color("229")).
+		Background(lipgloss.Color("57")).
+		Bold(false)
+	// Start with no highlight since table starts unfocused
+	baseStyles := s
+	s.Selected = lipgloss.NewStyle()
+	ptable.SetStyles(s)
+	baseStyles.Selected = selectedStyle
+
+	// Spinner
 	problemLoadingSpinner := spinner.New()
 	problemLoadingSpinner.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("69"))
 	problemLoadingSpinner.Spinner = spinner.Dot
@@ -44,6 +82,9 @@ func NewProblemListViewModel() *ProblemlistViewModel {
 		},
 		problems:       problems,
 		loadingSpinner: problemLoadingSpinner,
+		table:          ptable,
+		tableStyles:    baseStyles,
+		selectedStyle:  selectedStyle,
 	}
 }
 
@@ -52,37 +93,27 @@ func (m ProblemlistViewModel) Init() tea.Cmd {
 }
 
 func (m ProblemlistViewModel) View() tea.View {
-	innerWidth := max(m.Dims.Width, 10)
-
 	var content string
 	if m.loading {
 		content = m.loadingSpinner.View() + " searching..."
 	} else if len(m.problems) == 0 {
 		content = "no results."
 	} else {
-		var lines []string
-		for _, p := range m.problems {
-			line := fmt.Sprintf("%4s [%-6s] %s", p.ID, p.Difficulty, p.Title)
-			lines = append(lines, truncate(line, innerWidth))
-		}
-		content = strings.Join(lines, "\n")
+		idWidth := 4
+		diffWidth := 6
+		cellPadding := 2 * 3 // 1 char padding on each side per column, 3 columns
+		titleWidth := max(m.Dims.Width-idWidth-diffWidth-cellPadding, 4)
+		m.table.SetColumns([]table.Column{
+			{Title: "#", Width: idWidth},
+			{Title: "Diff", Width: diffWidth},
+			{Title: "Title", Width: titleWidth},
+		})
+		m.table.SetWidth(m.Dims.Width)
+		m.table.SetHeight(m.Dims.Height)
+		content = m.table.View()
 	}
 
-	style := lipgloss.NewStyle().
-		Width(m.Dims.Width).
-		Height(m.Dims.Height)
-
-	return tea.NewView(style.Render(content))
-}
-
-func truncate(s string, max int) string {
-	if len(s) <= max {
-		return s
-	}
-	if max <= 1 {
-		return s[:max]
-	}
-	return s[:max-1] + "…"
+	return tea.NewView(content)
 }
 
 type SearchQueryMsg struct{ Query string }
@@ -94,4 +125,21 @@ func (m ProblemlistViewModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	default:
 		return m.HandleUpdate(msg)
 	}
+}
+
+func (m *ProblemlistViewModel) GotoTop() {
+	m.table.GotoTop()
+}
+
+func (m *ProblemlistViewModel) SetFocused(focused bool) { // @override
+	m.Focused = focused
+	s := m.tableStyles
+	if m.Focused {
+		m.table.Focus()
+		s.Selected = m.selectedStyle
+	} else {
+		m.table.Blur()
+		s.Selected = lipgloss.NewStyle()
+	}
+	m.table.SetStyles(s)
 }

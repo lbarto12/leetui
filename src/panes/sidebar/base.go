@@ -2,6 +2,7 @@
 package sidebar
 
 import (
+	"leetui/src/lib/chup"
 	"leetui/src/lib/viewmodel"
 	"leetui/src/panes/sidebar/components"
 	"leetui/src/panes/sidebar/components/problemlist"
@@ -42,6 +43,10 @@ func (m SidebarModel) Init() tea.Cmd {
 
 func (m SidebarModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.SetSize(m.GetSize().Width, msg.Height)
+		chup.Forward(&m.problemlist, msg)
+		return m, nil
 	case tea.KeyPressMsg:
 		return m.HandleKeypress(msg)
 	default:
