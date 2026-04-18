@@ -8,7 +8,6 @@ import (
 	"leetui/src/lib/viewmodel"
 
 	tea "charm.land/bubbletea/v2"
-	"charm.land/lipgloss/v2"
 )
 
 type MainBodyModel struct {
@@ -46,19 +45,9 @@ func (m MainBodyModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m MainBodyModel) View() tea.View {
-	borderColor := lipgloss.Color("62")
-	if m.IsFocused() {
-		borderColor = lipgloss.Color("205")
-	}
-
-	style := lipgloss.NewStyle().
-		Width(m.Dims.Width).
-		Height(m.Dims.Height).
-		Align(lipgloss.Center, lipgloss.Center).
-		Border(lipgloss.RoundedBorder()).
-		BorderForeground(borderColor)
-
 	marshalled, _ := json.Marshal(m.selectedProblemDetails)
+
+	style := m.styles.body(m)
 
 	return tea.NewView(style.Render(string(marshalled)))
 }
