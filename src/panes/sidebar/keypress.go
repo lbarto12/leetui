@@ -14,8 +14,8 @@ func (m SidebarModel) HandleKeypress(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "enter":
 			if m.problemlist.HasProblemsAvailable() {
-				m.search.Blur()
 				m.focusedChild = focus.ProblemList
+				m.search.Blur()
 
 				m.problemlist.SetFocused(true)
 			}
