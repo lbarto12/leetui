@@ -35,7 +35,7 @@ func NewSidebarModel() (*SidebarModel, error) {
 		focusedChild: focus.SearchBar,
 		styles:       MakeStyles(),
 		search:       components.ProblemSearchBar(),
-		problemlist:  *problemlist.NewProblemListViewModel(),
+		problemlist:  problemlist.MakeProblemListViewModel(),
 	}, nil
 }
 

@@ -24,7 +24,7 @@ type ProblemlistViewModel struct {
 	table          table.Model
 }
 
-func NewProblemListViewModel() *ProblemlistViewModel {
+func MakeProblemListViewModel() ProblemlistViewModel {
 	styles := MakeStyles()
 
 	problems, err := graphqlapi.GetProblemsRaw(context.Background(), 0, 300, graphqlapi.QuestionGetFilter{})
@@ -52,7 +52,7 @@ func NewProblemListViewModel() *ProblemlistViewModel {
 	problemLoadingSpinner.Style = styles.spinnerStyle
 	problemLoadingSpinner.Spinner = spinner.Dot
 
-	return &ProblemlistViewModel{
+	return ProblemlistViewModel{
 		ViewModel: viewmodel.ViewModel{
 			Focused: false,
 			Dims: viewmodel.ViewModelDims{
