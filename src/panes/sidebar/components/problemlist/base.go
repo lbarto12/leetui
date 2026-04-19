@@ -52,6 +52,8 @@ func MakeProblemListViewModel() ProblemlistViewModel {
 	problemLoadingSpinner.Style = styles.spinnerStyle
 	problemLoadingSpinner.Spinner = spinner.Dot
 
+	ptable.GotoTop()
+
 	return ProblemlistViewModel{
 		ViewModel: viewmodel.ViewModel{
 			Focused: false,

@@ -13,6 +13,9 @@ func (m ProblemlistViewModel) HandleKeypress(msg tea.KeyPressMsg) (tea.Model, te
 	switch msg.String() {
 	case "enter", "l":
 		selected := m.table.SelectedRow()
+		if selected == nil {
+			return m, nil
+		}
 
 		cmd1 := cmds.SelectProblem(cmds.SelectProblemMsg{
 			ProblemID: selected[0], // problem id

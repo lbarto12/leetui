@@ -38,6 +38,7 @@ func (m ProblemlistViewModel) HandleUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		ptabledata := ConvertProblemsToTableRows(m.problems)
 		m.table.SetRows(ptabledata)
+		m.table.GotoTop()
 
 		return m, nil
 
