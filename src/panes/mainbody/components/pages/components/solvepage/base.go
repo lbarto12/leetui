@@ -2,6 +2,7 @@
 package solvepage
 
 import (
+	"fmt"
 	"os"
 
 	"leetui/src/lib/viewmodel"
@@ -13,9 +14,9 @@ import (
 
 type SolvePageModel struct {
 	viewmodel.ViewModel
-	style        Style
-	children     Children
-	selectedFile string
+	style       Style
+	children    Children
+	selectedDir string
 }
 
 func MakeSolvePageModel() SolvePageModel {
@@ -42,12 +43,22 @@ func (m SolvePageModel) Init() tea.Cmd {
 }
 
 func (m SolvePageModel) View() tea.View {
+	selectedText := "No folder selected"
+	if m.selectedDir != "" {
+		selectedText = m.selectedDir
+	}
+	selectedLine := fmt.Sprintf("Selected: %s", m.style.selected.Render(selectedText))
+
+	borderStyle := m.style.border(m).
+		Width(m.Dims.Width - 2).
+		Height(m.Dims.Height - 4) // border (2) + selected line (1) + blank line (1)
+
+	picker := borderStyle.Render(m.children.filePicker.View())
+
 	content := lipgloss.JoinVertical(
 		lipgloss.Top,
-		lipgloss.JoinHorizontal(
-			lipgloss.Left,
-			m.children.filePicker.View(),
-		),
+		picker,
+		selectedLine,
 	)
 
 	return tea.NewView(content)
@@ -57,7 +68,8 @@ func (m SolvePageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.SetSize(msg.Width, msg.Height)
-		m.children.filePicker.SetHeight(msg.Height)
+		// Border (2) + selected line (1) + blank line (1)
+		m.children.filePicker.SetHeight(msg.Height - 4)
 		return m, nil
 	case tea.KeyPressMsg:
 		return m.HandleKeypress(msg)
