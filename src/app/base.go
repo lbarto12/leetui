@@ -32,7 +32,7 @@ func MakeAppState() AppState {
 	as := AppState{
 		mainbody: mainbody.MakeMainBodyModel(),
 		sidebar:  *sb,
-		focused:  focus.Main,
+		focused:  focus.Sidebar,
 	}
 
 	return as

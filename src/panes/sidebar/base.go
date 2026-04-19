@@ -28,7 +28,7 @@ type SidebarModel struct {
 func NewSidebarModel() (*SidebarModel, error) {
 	return &SidebarModel{
 		ViewModel: viewmodel.ViewModel{
-			Focused: false,
+			Focused: true,
 			Dims:    viewmodel.ViewModelDims{Width: 50, Height: 0},
 		},
 		collapsed:    false,

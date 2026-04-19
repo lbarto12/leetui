@@ -30,15 +30,15 @@ func MakeMainBodyModel() MainBodyModel {
 
 	return MainBodyModel{
 		ViewModel: viewmodel.ViewModel{
-			Focused: true,
+			Focused: false,
 			Dims: viewmodel.ViewModelDims{
 				Width:  0,
 				Height: 0,
 			},
 		},
-		styles:         MakeStyles(),
+		styles:          MakeStyles(),
 		selectedProblem: "Select a problem to see it here",
-		loadingSpinner: s,
+		loadingSpinner:  s,
 		children: Children{
 			pages: pages.MakeMainBodyPagesModel(),
 		},
