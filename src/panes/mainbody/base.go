@@ -11,6 +11,7 @@ import (
 	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+	figure "github.com/common-nighthawk/go-figure"
 )
 
 type MainBodyModel struct {
@@ -59,26 +60,38 @@ func (m MainBodyModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
+func (m MainBodyModel) hasProblem() bool {
+	return m.selectedProblemDetails.ID != ""
+}
+
 func (m MainBodyModel) View() tea.View {
 	bodyStyle := m.styles.body(m)
-	titleStyle := m.styles.title(m)
+	innerWidth := m.Dims.Width - bodyStyle.GetHorizontalBorderSize()
+	innerHeight := m.Dims.Height - bodyStyle.GetVerticalBorderSize()
 
-	var content string
-	if m.loading {
-		content = lipgloss.Place(
-			m.Dims.Width, m.Dims.Height,
+	var view string
+	if !m.hasProblem() && !m.loading {
+		logo := figure.NewFigure("LeetUI", "larry3d", true).String()
+		view = bodyStyle.Render(lipgloss.Place(
+			innerWidth, innerHeight,
+			lipgloss.Center, lipgloss.Center,
+			lipgloss.NewStyle().Foreground(lipgloss.Color("99")).Bold(true).Render(logo),
+		))
+	} else if m.loading {
+		view = bodyStyle.Render(lipgloss.Place(
+			innerWidth, innerHeight,
 			lipgloss.Center, lipgloss.Center,
 			m.loadingSpinner.View()+" Getting problem...",
-		)
+		))
 	} else {
-		content = m.children.pages.View().Content
+		titleStyle := m.styles.title(m)
+		content := m.children.pages.View().Content
+		view = bodyStyle.Render(lipgloss.JoinVertical(
+			lipgloss.Top,
+			titleStyle.Render(fmt.Sprintf("%s - %s", m.selectedProblemDetails.ID, m.selectedProblemDetails.Title)),
+			content,
+		))
 	}
-
-	view := bodyStyle.Render(lipgloss.JoinVertical(
-		lipgloss.Top,
-		titleStyle.Render(fmt.Sprintf("%s - %s", m.selectedProblemDetails.ID, m.selectedProblemDetails.Title)),
-		content,
-	))
 
 	return tea.NewView(view)
 }
