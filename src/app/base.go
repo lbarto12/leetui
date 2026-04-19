@@ -68,6 +68,9 @@ func (s AppState) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		s.focused = focus.Main
 		s.sidebar.SetFocused(false)
 		s.mainbody.SetFocused(true)
+		mb, cmd := s.mainbody.Update(msg)
+		s.mainbody = mb.(mainbody.MainBodyModel)
+		return s, cmd
 	default:
 		return s.PassToChildren(msg)
 	}

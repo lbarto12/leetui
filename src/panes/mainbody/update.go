@@ -6,6 +6,7 @@ import (
 	"leetui/src/lib/common/cmds"
 	"leetui/src/lib/graphqlapi"
 
+	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 )
@@ -30,17 +31,26 @@ func (m MainBodyModel) HandleUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.PassToChildren(childMsg)
 	case cmds.SelectProblemMsg:
 		m.selectedProblem = msg.ProblemID
-		return m, nil
+		m.loading = true
+		return m, m.loadingSpinner.Tick
 	case graphqlapi.ProblemDetailsLoadedMsg:
+		m.loading = false
 		if msg.Err != nil {
 			m.selectedProblem = "invalid problem selected"
 			return m, nil
 		}
 		m.selectedProblemDetails = *msg.Details
 		m.children.pages.SetProblemDetails(*msg.Details)
+		m.children.pages.ResetSelections()
+		return m, nil
+	case spinner.TickMsg:
+		if m.loading {
+			var cmd tea.Cmd
+			m.loadingSpinner, cmd = m.loadingSpinner.Update(msg)
+			return m, cmd
+		}
 		return m, nil
 	default:
-		_ = msg // Ignore
 		return m.PassToChildren(msg)
 	}
 }

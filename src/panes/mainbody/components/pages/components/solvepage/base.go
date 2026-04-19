@@ -49,6 +49,11 @@ func MakeSolvePageModel() SolvePageModel {
 	}
 }
 
+func (m *SolvePageModel) ResetSelection() {
+	m.selectedLang = ""
+	m.focusedChild = focus.FilePicker
+}
+
 func (m *SolvePageModel) SetLanguages(snippets []models.CodeSnippet) {
 	items := make([]list.Item, len(snippets))
 	for i, s := range snippets {

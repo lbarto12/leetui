@@ -25,6 +25,10 @@ func MakeTabsModel(options []string) TabsModel {
 	}
 }
 
+func (m *TabsModel) SetSelected(i int) {
+	m.selected = i
+}
+
 func (m TabsModel) Init() tea.Cmd {
 	return nil
 }
