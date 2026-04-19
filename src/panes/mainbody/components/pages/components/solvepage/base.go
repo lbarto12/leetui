@@ -17,11 +17,12 @@ import (
 
 type SolvePageModel struct {
 	viewmodel.ViewModel
-	style        Style
-	children     Children
-	selectedDir  string
-	selectedLang string
-	focusedChild int
+	style          Style
+	children       Children
+	problemDetails models.ProblemDetails
+	selectedDir    string
+	selectedLang   string
+	focusedChild   int
 }
 
 func MakeSolvePageModel() SolvePageModel {
@@ -54,9 +55,10 @@ func (m *SolvePageModel) ResetSelection() {
 	m.focusedChild = focus.FilePicker
 }
 
-func (m *SolvePageModel) SetLanguages(snippets []models.CodeSnippet) {
-	items := make([]list.Item, len(snippets))
-	for i, s := range snippets {
+func (m *SolvePageModel) SetProblemDetails(details models.ProblemDetails) {
+	m.problemDetails = details
+	items := make([]list.Item, len(details.CodeSnippets))
+	for i, s := range details.CodeSnippets {
 		items[i] = LangItem{lang: s.Lang, langSlug: s.LangSlug}
 	}
 	m.children.langList.SetItems(items)

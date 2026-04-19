@@ -14,6 +14,9 @@ func (m SolvePageModel) HandleKeypress(msg tea.KeyPressMsg) (tea.Model, tea.Cmd)
 	case "[":
 		m.focusedChild = focus.FilePicker
 		return m, nil
+	case "c":
+		CloneProblemAndOpenEditor(m.selectedDir, m.selectedLang, m.problemDetails)
+		return m, nil
 	case "enter":
 		if m.focusedChild == focus.LangList {
 			if item := m.children.langList.SelectedItem(); item != nil {
