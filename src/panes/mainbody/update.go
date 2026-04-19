@@ -1,18 +1,31 @@
 package mainbody
 
 import (
+	"fmt"
+
 	"leetui/src/lib/common/cmds"
 	"leetui/src/lib/graphqlapi"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 )
 
 func (m MainBodyModel) HandleUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.SetSize(m.GetSize().Width, msg.Height)
-		m.PassToChildren(msg)
-		return m, nil
+
+		// Account for body border and title bar
+		bodyBorder := m.styles.body(m).GetVerticalBorderSize()
+		titleHeight := lipgloss.Height(m.styles.title(m).Render(
+			fmt.Sprintf("%s - %s", m.selectedProblemDetails.ID, m.selectedProblemDetails.Title),
+		))
+
+		childMsg := tea.WindowSizeMsg{
+			Width:  msg.Width,
+			Height: msg.Height - bodyBorder - titleHeight,
+		}
+		return m.PassToChildren(childMsg)
 	case cmds.SelectProblemMsg:
 		m.selectedProblem = msg.ProblemID
 		return m, nil
@@ -22,6 +35,7 @@ func (m MainBodyModel) HandleUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		m.selectedProblemDetails = *msg.Details
+		m.children.pages.SetProblemDetails(*msg.Details)
 		return m, nil
 	default:
 		_ = msg // Ignore

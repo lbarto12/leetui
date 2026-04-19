@@ -2,14 +2,32 @@ package pages
 
 import (
 	"leetui/src/lib/common/cmds"
+	"leetui/src/lib/chup"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 )
+
+// tabsHeight returns the rendered height of the tabs component.
+func (m MainBodyPagesModel) tabsHeight() int {
+	return lipgloss.Height(m.children.tabs.View().Content)
+}
 
 func (m MainBodyPagesModel) HandleUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case cmds.SetMainBodyPageMsg:
 		m.selectedPage = msg.Page
+		return m, nil
+	case tea.WindowSizeMsg:
+		// Forward full size to tabs
+		chup.Forward(&m.children.tabs, msg)
+
+		// Subtract tabs height for the page content
+		pageMsg := tea.WindowSizeMsg{
+			Width:  msg.Width,
+			Height: msg.Height - m.tabsHeight(),
+		}
+		chup.Forward(&m.children.descriptionPage, pageMsg)
 		return m, nil
 	default:
 		return m.PassToChildren(msg)

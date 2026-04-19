@@ -18,7 +18,7 @@ func MakeStyles() Styles {
 			bodyStyle := lipgloss.NewStyle().
 				Width(m.Dims.Width).
 				Height(m.Dims.Height).
-				Align(lipgloss.Center, lipgloss.Top).
+				Align(lipgloss.Left, lipgloss.Top).
 				Border(lipgloss.RoundedBorder()).
 				BorderForeground(borderColor)
 

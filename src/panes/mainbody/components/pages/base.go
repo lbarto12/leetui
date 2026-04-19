@@ -2,6 +2,7 @@
 package pages
 
 import (
+	"leetui/src/lib/graphqlapi/models"
 	"leetui/src/lib/viewmodel"
 	"leetui/src/panes/mainbody/components/pages/components/descriptionpage"
 	"leetui/src/panes/mainbody/components/pages/components/tabs"
@@ -13,8 +14,9 @@ import (
 
 type MainBodyPagesModel struct {
 	viewmodel.ViewModel
-	children     Children
-	selectedPage int
+	children       Children
+	selectedPage   int
+	problemDetails models.ProblemDetails
 }
 
 func MakeMainBodyPagesModel() MainBodyPagesModel {
