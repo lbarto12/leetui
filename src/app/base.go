@@ -6,6 +6,7 @@ import (
 
 	"leetui/src/app/focus"
 	"leetui/src/lib/chup"
+	"leetui/src/lib/common/cmds"
 	"leetui/src/panes/mainbody"
 	"leetui/src/panes/sidebar"
 
@@ -63,6 +64,10 @@ func (s AppState) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		s.mainbody.SetSize(mainWidth, msg.Height)
 		mainMsg := tea.WindowSizeMsg{Width: mainWidth, Height: msg.Height}
 		chup.Forward(&s.mainbody, mainMsg)
+	case cmds.SelectProblemMsg:
+		s.focused = focus.Main
+		s.sidebar.SetFocused(false)
+		s.mainbody.SetFocused(true)
 	default:
 		return s.PassToChildren(msg)
 	}
