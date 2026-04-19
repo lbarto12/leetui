@@ -2,6 +2,8 @@
 package pages
 
 import (
+	"strings"
+
 	"leetui/src/lib/graphqlapi/models"
 	"leetui/src/lib/viewmodel"
 	"leetui/src/panes/mainbody/components/pages/components/descriptionpage"
@@ -50,7 +52,9 @@ func (m MainBodyPagesModel) View() tea.View {
 		content = m.children.descriptionPage.View().Content
 	}
 
-	view := lipgloss.JoinVertical(lipgloss.Top, m.children.tabs.View().Content, content)
+	separator := strings.Repeat("─", m.Dims.Width)
+
+	view := lipgloss.JoinVertical(lipgloss.Top, m.children.tabs.View().Content, separator, content)
 
 	return tea.NewView(view)
 }

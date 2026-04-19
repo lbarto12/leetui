@@ -19,13 +19,15 @@ func (m MainBodyPagesModel) HandleUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.selectedPage = msg.Page
 		return m, nil
 	case tea.WindowSizeMsg:
+		m.SetSize(msg.Width, msg.Height)
+
 		// Forward full size to tabs
 		chup.Forward(&m.children.tabs, msg)
 
-		// Subtract tabs height for the page content
+		// Subtract tabs height and separator (1 line) for the page content
 		pageMsg := tea.WindowSizeMsg{
 			Width:  msg.Width,
-			Height: msg.Height - m.tabsHeight(),
+			Height: msg.Height - m.tabsHeight() - 1,
 		}
 		chup.Forward(&m.children.descriptionPage, pageMsg)
 		return m, nil
