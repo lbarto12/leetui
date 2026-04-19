@@ -46,8 +46,15 @@ func (m SidebarModel) Init() tea.Cmd {
 func (m SidebarModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.SetSize(m.GetSize().Width, msg.Height)
-		chup.Forward(&m.problemlist, msg)
+		m.SetSize(msg.Width, msg.Height)
+
+		// Pass inner dimensions to problemlist:
+		// subtract border (2) vertically and horizontally,
+		// and search bar + blank line (2) vertically
+		innerWidth := msg.Width - 2
+		innerHeight := msg.Height - 2 - 2
+		plMsg := tea.WindowSizeMsg{Width: innerWidth, Height: innerHeight}
+		chup.Forward(&m.problemlist, plMsg)
 		return m, nil
 	case tea.KeyPressMsg:
 		return m.HandleKeypress(msg)

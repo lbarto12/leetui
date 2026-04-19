@@ -13,17 +13,19 @@ import (
 func (m MainBodyModel) HandleUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.SetSize(m.GetSize().Width, msg.Height)
+		m.SetSize(msg.Width, msg.Height)
 
 		// Account for body border and title bar
-		bodyBorder := m.styles.body(m).GetVerticalBorderSize()
+		bodyStyle := m.styles.body(m)
+		borderH := bodyStyle.GetVerticalBorderSize()
+		borderW := bodyStyle.GetHorizontalBorderSize()
 		titleHeight := lipgloss.Height(m.styles.title(m).Render(
 			fmt.Sprintf("%s - %s", m.selectedProblemDetails.ID, m.selectedProblemDetails.Title),
 		))
 
 		childMsg := tea.WindowSizeMsg{
-			Width:  msg.Width,
-			Height: msg.Height - bodyBorder - titleHeight,
+			Width:  msg.Width - borderW,
+			Height: msg.Height - borderH - titleHeight,
 		}
 		return m.PassToChildren(childMsg)
 	case cmds.SelectProblemMsg:

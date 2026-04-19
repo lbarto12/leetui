@@ -13,9 +13,9 @@ import (
 func (m ProblemlistViewModel) HandleUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.SetSize(m.GetSize().Width, msg.Height-4)
-		m.table.SetWidth(m.GetSize().Width)
-		m.table.SetHeight(m.GetSize().Height)
+		m.SetSize(msg.Width, msg.Height)
+		m.table.SetWidth(msg.Width)
+		m.table.SetHeight(msg.Height)
 		return m, nil
 	case cmds.SearchQueryMsg:
 		if m.searchCancel != nil {

@@ -50,12 +50,19 @@ func (s AppState) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		s.width = msg.Width
 		s.height = msg.Height
 
-		chup.Forward(&s.sidebar, msg)
-		chup.Forward(&s.mainbody, msg)
+		// Sidebar keeps its own width, gets full height
+		sidebarWidth := s.sidebar.GetSize().Width
+		sidebarMsg := tea.WindowSizeMsg{Width: sidebarWidth, Height: msg.Height}
+		chup.Forward(&s.sidebar, sidebarMsg)
 
-		// Set children sizes on resize
-		// s.sidebar.SetSize(s.sidebar.GetSize().Width, msg.Height)
-		s.mainbody.SetSize(msg.Width-s.sidebar.GetSize().Width, msg.Height)
+		// Mainbody gets remaining width and full height
+		mainWidth := msg.Width - sidebarWidth
+		if s.sidebar.IsCollapsed() {
+			mainWidth = msg.Width
+		}
+		s.mainbody.SetSize(mainWidth, msg.Height)
+		mainMsg := tea.WindowSizeMsg{Width: mainWidth, Height: msg.Height}
+		chup.Forward(&s.mainbody, mainMsg)
 	default:
 		return s.PassToChildren(msg)
 	}
