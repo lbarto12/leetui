@@ -20,6 +20,7 @@ type SolvePageModel struct {
 	style        Style
 	children     Children
 	selectedDir  string
+	selectedLang string
 	focusedChild int
 }
 
@@ -30,7 +31,7 @@ func MakeSolvePageModel() SolvePageModel {
 	fp.DirAllowed = true
 
 	ll := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
-	ll.Title = "Language"
+	ll.SetShowTitle(false)
 	ll.SetShowHelp(false)
 	ll.SetFilteringEnabled(false)
 	ll.SetShowStatusBar(false)
@@ -62,31 +63,45 @@ func (m SolvePageModel) Init() tea.Cmd {
 	)
 }
 
-func (m SolvePageModel) View() tea.View {
-	selectedText := "No folder selected"
-	if m.selectedDir != "" {
-		selectedText = m.selectedDir
-	}
-	selectedLine := fmt.Sprintf("Selected: %s", m.style.selected.Render(selectedText))
+const labelsHeight = 2
 
-	halfWidth := m.Dims.Width / 2
-	innerHeight := m.Dims.Height - 4 // border (2) + selected line (1) + gap (1)
+func (m SolvePageModel) View() tea.View {
+	innerHeight := m.Dims.Height - 2 - labelsHeight // border (2) + labels (2)
+
+	// Directory label
+	dirSelection := m.style.selected.Render("N/A")
+	if m.selectedDir != "" {
+		dirSelection = m.style.selected.Render(m.selectedDir)
+	}
+	dirLabel := fmt.Sprintf("%s %s", m.style.title.Render("Directory:"), dirSelection)
+
+	// Language label
+	langSelection := m.style.selected.Render("N/A")
+	if m.selectedLang != "" {
+		langSelection = m.style.selected.Render(m.selectedLang)
+	}
+	langLabel := fmt.Sprintf("%s %s", m.style.title.Render("Language:"), langSelection)
+
+	panelWidth := (m.Dims.Width - 4) / 2
 
 	fpBorder := m.style.border(m.focusedChild == focus.FilePicker).
-		Width(halfWidth - 2).
-		Height(innerHeight)
+		Width(panelWidth).
+		Height(innerHeight).
+		MaxHeight(innerHeight + 2)
 
 	llBorder := m.style.border(m.focusedChild == focus.LangList).
-		Width(m.Dims.Width - halfWidth - 2).
-		Height(innerHeight)
+		Width(panelWidth).
+		Height(innerHeight).
+		MaxHeight(innerHeight + 2)
 
 	picker := fpBorder.Render(m.children.filePicker.View())
 	langList := llBorder.Render(m.children.langList.View())
 
 	content := lipgloss.JoinVertical(
 		lipgloss.Top,
+		dirLabel,
+		langLabel,
 		lipgloss.JoinHorizontal(lipgloss.Top, picker, langList),
-		selectedLine,
 	)
 
 	return tea.NewView(content)
@@ -96,9 +111,10 @@ func (m SolvePageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.SetSize(msg.Width, msg.Height)
-		innerHeight := msg.Height - 4
-		m.children.filePicker.SetHeight(innerHeight)
-		m.children.langList.SetSize(msg.Width-msg.Width/2-2, innerHeight)
+		innerHeight := msg.Height - 2 - labelsHeight // border (2) + labels (2)
+		panelWidth := (msg.Width - 4) / 2
+		m.children.filePicker.SetHeight(innerHeight - 1)
+		m.children.langList.SetSize(panelWidth, innerHeight)
 		return m, nil
 	case tea.KeyPressMsg:
 		return m.HandleKeypress(msg)

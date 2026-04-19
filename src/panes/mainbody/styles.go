@@ -26,7 +26,7 @@ func MakeStyles() Styles {
 		},
 		title: func(m MainBodyModel) lipgloss.Style {
 			return lipgloss.NewStyle().
-				Width(m.Dims.Width-2).
+				Width(m.Dims.Width - 2).
 				Bold(true).
 				Foreground(lipgloss.Color("5")).
 				Padding(0, 1).

@@ -14,6 +14,22 @@ func (m SolvePageModel) HandleKeypress(msg tea.KeyPressMsg) (tea.Model, tea.Cmd)
 	case "[":
 		m.focusedChild = focus.FilePicker
 		return m, nil
+	case "enter":
+		if m.focusedChild == focus.LangList {
+			if item := m.children.langList.SelectedItem(); item != nil {
+				m.selectedLang = item.(LangItem).lang
+			}
+			return m, nil
+		}
+
+		// Forward to filepicker for dir selection
+		model, cmd := m.PassToFocusedChild(msg)
+		m = model.(SolvePageModel)
+		if didSelect, path := m.children.filePicker.DidSelectFile(msg); didSelect {
+			m.selectedDir = path
+		}
+		return m, cmd
+
 	default:
 		model, cmd := m.PassToFocusedChild(msg)
 		m = model.(SolvePageModel)
