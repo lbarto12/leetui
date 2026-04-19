@@ -7,6 +7,7 @@ import (
 	"leetui/src/lib/graphqlapi/models"
 	"leetui/src/lib/viewmodel"
 	"leetui/src/panes/mainbody/components/pages/components/descriptionpage"
+	"leetui/src/panes/mainbody/components/pages/components/solvepage"
 	"leetui/src/panes/mainbody/components/pages/components/tabs"
 	"leetui/src/panes/mainbody/components/pages/focus"
 
@@ -29,10 +30,10 @@ func MakeMainBodyPagesModel() MainBodyPagesModel {
 		children: Children{
 			tabs: tabs.MakeTabsModel([]string{
 				"Description",
-				"Test 1",
-				"Test 2",
+				"Solve",
 			}),
 			descriptionPage: descriptionpage.MakeDescriptionPageModel(),
+			solvePage:       solvepage.MakeSolvePageModel(),
 		},
 		selectedPage: focus.DescriptionPage,
 	}
@@ -50,6 +51,8 @@ func (m MainBodyPagesModel) View() tea.View {
 	switch m.selectedPage {
 	case focus.DescriptionPage:
 		content = m.children.descriptionPage.View().Content
+	case focus.SolvePage:
+		content = m.children.solvePage.View().Content
 	}
 
 	separator := strings.Repeat("─", m.Dims.Width)
