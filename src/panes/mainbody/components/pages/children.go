@@ -5,6 +5,7 @@ import (
 	"leetui/src/panes/mainbody/components/pages/components/descriptionpage"
 	"leetui/src/panes/mainbody/components/pages/components/solvepage"
 	"leetui/src/panes/mainbody/components/pages/components/tabs"
+	"leetui/src/panes/mainbody/components/pages/focus"
 
 	tea "charm.land/bubbletea/v2"
 )
@@ -16,9 +17,28 @@ type Children struct {
 }
 
 func (m MainBodyPagesModel) PassToChildren(msg tea.Msg) (tea.Model, tea.Cmd) {
+	cmdtabs := chup.Forward(&m.children.tabs, msg)
+
 	return m, tea.Batch(
-		chup.Forward(&m.children.tabs, msg),
+		cmdtabs,
 		chup.Forward(&m.children.descriptionPage, msg),
 		chup.Forward(&m.children.solvePage, msg),
+	)
+}
+
+func (m MainBodyPagesModel) PassToFocusedPage(msg tea.Msg) (tea.Model, tea.Cmd) {
+	cmdtabs := chup.Forward(&m.children.tabs, msg)
+
+	var pagecmd tea.Cmd
+	switch m.selectedPage {
+	case focus.DescriptionPage:
+		pagecmd = chup.Forward(&m.children.descriptionPage, msg)
+	case focus.SolvePage:
+		pagecmd = chup.Forward(&m.children.solvePage, msg)
+	}
+
+	return m, tea.Batch(
+		cmdtabs,
+		pagecmd,
 	)
 }

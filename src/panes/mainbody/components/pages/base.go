@@ -42,6 +42,7 @@ func MakeMainBodyPagesModel() MainBodyPagesModel {
 func (m MainBodyPagesModel) Init() tea.Cmd {
 	return tea.Batch(
 		m.children.descriptionPage.Init(),
+		m.children.solvePage.Init(),
 	)
 }
 

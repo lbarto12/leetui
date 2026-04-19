@@ -30,6 +30,7 @@ func (m MainBodyPagesModel) HandleUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 			Height: msg.Height - m.tabsHeight() - 1,
 		}
 		chup.Forward(&m.children.descriptionPage, pageMsg)
+		chup.Forward(&m.children.solvePage, pageMsg)
 		return m, nil
 	default:
 		return m.PassToChildren(msg)
