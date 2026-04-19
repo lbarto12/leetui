@@ -18,8 +18,9 @@ func (m ProblemlistViewModel) HandleUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.table.SetHeight(msg.Height)
 		return m, nil
 	case cmds.SearchQueryMsg:
+		// Cancel any in-flight search before starting a new one
 		if m.searchCancel != nil {
-			return m, nil
+			m.searchCancel()
 		}
 
 		ctx, cancel := context.WithCancel(context.Background())
@@ -30,11 +31,14 @@ func (m ProblemlistViewModel) HandleUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 		})
 
 	case graphqlapi.ProblemsLoadedMsg:
+		// Ignore cancelled requests - a newer search is in flight
+		if msg.Err != nil {
+			return m, nil
+		}
+
 		m.loading = false
 		m.searchCancel = nil
-		if msg.Err == nil {
-			m.problems = msg.Problems
-		}
+		m.problems = msg.Problems
 
 		ptabledata := ConvertProblemsToTableRows(m.problems)
 		m.table.SetRows(ptabledata)
