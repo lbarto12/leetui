@@ -34,6 +34,16 @@ func (s AppState) HandleKeypress(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 			s.mainbody.SetFocused(true)
 		}
 
+		mainWidth := s.width
+		if !s.sidebar.IsCollapsed() {
+			mainWidth = s.width - s.sidebar.GetSize().Width
+		}
+		s.mainbody.SetSize(mainWidth, s.height)
+		mainMsg := tea.WindowSizeMsg{Width: mainWidth, Height: s.height}
+		mb, cmd := s.mainbody.Update(mainMsg)
+		s.mainbody = mb.(mainbody.MainBodyModel)
+		return s, cmd
+
 	default:
 		switch s.focused {
 		case focus.Main:
