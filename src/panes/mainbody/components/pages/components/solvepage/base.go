@@ -5,18 +5,22 @@ import (
 	"fmt"
 	"os"
 
+	"leetui/src/lib/graphqlapi/models"
 	"leetui/src/lib/viewmodel"
+	"leetui/src/panes/mainbody/components/pages/components/solvepage/focus"
 
 	"charm.land/bubbles/v2/filepicker"
+	"charm.land/bubbles/v2/list"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 )
 
 type SolvePageModel struct {
 	viewmodel.ViewModel
-	style       Style
-	children    Children
-	selectedDir string
+	style        Style
+	children     Children
+	selectedDir  string
+	focusedChild int
 }
 
 func MakeSolvePageModel() SolvePageModel {
@@ -25,15 +29,31 @@ func MakeSolvePageModel() SolvePageModel {
 	fp.CurrentDirectory, _ = os.UserHomeDir()
 	fp.DirAllowed = true
 
+	ll := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
+	ll.Title = "Language"
+	ll.SetShowHelp(false)
+	ll.SetFilteringEnabled(false)
+	ll.SetShowStatusBar(false)
+
 	return SolvePageModel{
 		ViewModel: viewmodel.ViewModel{
 			Focused: false,
 		},
-		style: MakeStyles(),
+		style:        MakeStyles(),
+		focusedChild: focus.FilePicker,
 		children: Children{
 			filePicker: fp,
+			langList:   ll,
 		},
 	}
+}
+
+func (m *SolvePageModel) SetLanguages(snippets []models.CodeSnippet) {
+	items := make([]list.Item, len(snippets))
+	for i, s := range snippets {
+		items[i] = LangItem{lang: s.Lang, langSlug: s.LangSlug}
+	}
+	m.children.langList.SetItems(items)
 }
 
 func (m SolvePageModel) Init() tea.Cmd {
@@ -49,15 +69,23 @@ func (m SolvePageModel) View() tea.View {
 	}
 	selectedLine := fmt.Sprintf("Selected: %s", m.style.selected.Render(selectedText))
 
-	borderStyle := m.style.border(m).
-		Width(m.Dims.Width - 2).
-		Height(m.Dims.Height - 4) // border (2) + selected line (1) + blank line (1)
+	halfWidth := m.Dims.Width / 2
+	innerHeight := m.Dims.Height - 4 // border (2) + selected line (1) + gap (1)
 
-	picker := borderStyle.Render(m.children.filePicker.View())
+	fpBorder := m.style.border(m.focusedChild == focus.FilePicker).
+		Width(halfWidth - 2).
+		Height(innerHeight)
+
+	llBorder := m.style.border(m.focusedChild == focus.LangList).
+		Width(m.Dims.Width - halfWidth - 2).
+		Height(innerHeight)
+
+	picker := fpBorder.Render(m.children.filePicker.View())
+	langList := llBorder.Render(m.children.langList.View())
 
 	content := lipgloss.JoinVertical(
 		lipgloss.Top,
-		picker,
+		lipgloss.JoinHorizontal(lipgloss.Top, picker, langList),
 		selectedLine,
 	)
 
@@ -68,8 +96,9 @@ func (m SolvePageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.SetSize(msg.Width, msg.Height)
-		// Border (2) + selected line (1) + blank line (1)
-		m.children.filePicker.SetHeight(msg.Height - 4)
+		innerHeight := msg.Height - 4
+		m.children.filePicker.SetHeight(innerHeight)
+		m.children.langList.SetSize(msg.Width-msg.Width/2-2, innerHeight)
 		return m, nil
 	case tea.KeyPressMsg:
 		return m.HandleKeypress(msg)

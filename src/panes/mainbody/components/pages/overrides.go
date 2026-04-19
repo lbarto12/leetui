@@ -9,4 +9,5 @@ func (m *MainBodyPagesModel) SetPage(page int) {
 func (m *MainBodyPagesModel) SetProblemDetails(details models.ProblemDetails) {
 	m.problemDetails = details
 	m.children.descriptionPage.SetContent(details.Content)
+	m.children.solvePage.SetLanguages(details.CodeSnippets)
 }
