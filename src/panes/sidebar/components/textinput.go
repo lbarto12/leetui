@@ -8,6 +8,7 @@ func ProblemSearchBar() textinput.Model {
 	ti.Placeholder = "Find problems..."
 	ti.Prompt = " "
 	ti.CharLimit = 128
+	ti.Focus() // as initial
 
 	return ti
 }
