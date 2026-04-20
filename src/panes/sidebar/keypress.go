@@ -16,7 +16,6 @@ func (m SidebarModel) HandleKeypress(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 			if m.problemlist.HasProblemsAvailable() {
 				m.focusedChild = focus.ProblemList
 				m.search.Blur()
-
 				m.problemlist.SetFocused(true)
 			}
 			return m, nil
@@ -39,7 +38,7 @@ func (m SidebarModel) HandleKeypress(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 
 	case focus.ProblemList:
 		switch msg.String() {
-		case "esc":
+		case "esc", "backspace":
 			m.search.Focus()
 			m.focusedChild = focus.SearchBar
 			m.problemlist.SetFocused(false)
