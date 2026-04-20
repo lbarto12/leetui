@@ -23,12 +23,17 @@ func (m SidebarModel) HandleKeypress(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 		default:
 			var cmd1, cmd2 tea.Cmd
 
+			previousQuery := m.search.Value()
 			m.search, cmd1 = m.search.Update(msg)
 
-			searchMsg := cmds.SearchQueryMsg{Query: m.search.Value()}
-			var listModel tea.Model
-			listModel, cmd2 = m.problemlist.Update(searchMsg)
-			m.problemlist = listModel.(problemlist.ProblemlistViewModel)
+			// If value is the same, do not re-evaluate
+			if previousQuery != m.search.Value() {
+				searchMsg := cmds.SearchQueryMsg{Query: m.search.Value()}
+				var listModel tea.Model
+				listModel, cmd2 = m.problemlist.Update(searchMsg)
+				m.problemlist = listModel.(problemlist.ProblemlistViewModel)
+			}
+
 			return m, tea.Batch(cmd1, cmd2)
 		}
 
