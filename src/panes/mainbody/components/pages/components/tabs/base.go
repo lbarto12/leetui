@@ -2,6 +2,8 @@
 package tabs
 
 import (
+	"strings"
+
 	"leetui/src/lib/viewmodel"
 
 	tea "charm.land/bubbletea/v2"
@@ -41,12 +43,19 @@ func (m TabsModel) View() tea.View {
 	}
 
 	content := lipgloss.JoinHorizontal(lipgloss.Top, t...)
+	content = lipgloss.JoinHorizontal(
+		lipgloss.Bottom,
+		lipgloss.JoinHorizontal(lipgloss.Top, t...),
+		m.styles.tabGap(m).Render(strings.Repeat(" ", max(0, m.Dims.Width-lipgloss.Width(content)-1))),
+	)
 
 	return tea.NewView(content)
 }
 
 func (m TabsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.SetSize(msg.Width, msg.Height)
 	case tea.KeyPressMsg:
 		return m.HandleKeyPress(msg)
 	}

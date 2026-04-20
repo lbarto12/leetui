@@ -3,7 +3,8 @@ package tabs
 import "charm.land/lipgloss/v2"
 
 type Styles struct {
-	tab func(m TabsModel, tab int) lipgloss.Style
+	tab    func(m TabsModel, tab int) lipgloss.Style
+	tabGap func(m TabsModel) lipgloss.Style
 }
 
 func tabBorderWithBottom(left, middle, right string) lipgloss.Border {
@@ -17,6 +18,8 @@ func tabBorderWithBottom(left, middle, right string) lipgloss.Border {
 func MakeStyles() Styles {
 	inactiveTabBorder := tabBorderWithBottom("┴", "─", "┴")
 	activeTabBorder := tabBorderWithBottom("┘", " ", "└")
+
+	tabGap := tabBorderWithBottom("", "─", "")
 
 	return Styles{
 		tab: func(m TabsModel, tab int) lipgloss.Style {
@@ -35,6 +38,11 @@ func MakeStyles() Styles {
 			}
 
 			return style
+		},
+		tabGap: func(m TabsModel) lipgloss.Style {
+			return lipgloss.NewStyle().
+				Border(tabGap, false, false, true, false).
+				BorderForeground(lipgloss.Color("62"))
 		},
 	}
 }
