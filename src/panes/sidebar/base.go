@@ -64,19 +64,21 @@ func (m SidebarModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m SidebarModel) View() tea.View {
-	borderColor := m.styles.borderColor
-	if m.IsFocused() {
-		borderColor = m.styles.focusedBorderColor
-	}
-
 	innerWidth := m.Dims.Width - 2 // border takes 2 columns
-	m.search.SetWidth(innerWidth - 2)
+	m.search.SetWidth(innerWidth - 3)
 
 	m.problemlist.Dims = viewmodel.ViewModelDims{
 		Width:  innerWidth,
 		Height: m.Dims.Height - 2 - 2, // border + (search + blank)
 	}
 
+	// Set input styles
+	inputStyle := m.search.Styles()
+	inputStyle.Focused.Text = m.styles.searchStyle(m)
+	inputStyle.Focused.Placeholder = m.styles.searchStyle(m)
+	m.search.SetStyles(inputStyle)
+
+	// Join view
 	content := lipgloss.JoinVertical(
 		lipgloss.Left,
 		m.search.View(),
@@ -84,11 +86,5 @@ func (m SidebarModel) View() tea.View {
 		m.problemlist.View().Content,
 	)
 
-	style := lipgloss.NewStyle().
-		Width(m.Dims.Width).
-		Height(m.Dims.Height).
-		Border(m.styles.border).
-		BorderForeground(borderColor)
-
-	return tea.NewView(style.Render(content))
+	return tea.NewView(m.styles.body(m).Render(content))
 }
