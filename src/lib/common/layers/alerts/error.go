@@ -2,6 +2,7 @@
 package alerts
 
 import (
+	"fmt"
 	"time"
 
 	"leetui/src/lib/viewmodel"
@@ -37,8 +38,8 @@ func (m ErrorModalModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case AlertErrorMsg:
 		m.Show = true
-		m.CurrentMessage = msg.Message
-		m.Dims.Width = len(msg.Message) + 4
+		m.CurrentMessage = fmt.Sprintf("  %s", msg.Message)
+		m.Dims.Width = len(m.CurrentMessage) + 4
 		return m, DurationTimeoutCmd(msg.Duration)
 	case HideAlertErrorMsg:
 		m.Show = false
@@ -61,6 +62,7 @@ func (m ErrorModalModel) NewErrorModal() string {
 	return lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Color("1")).
+		Foreground(lipgloss.Color("1")).
 		Height(m.Dims.Height).
 		Width(m.Dims.Width). // Padding around sides
 		Padding(0, 1).
