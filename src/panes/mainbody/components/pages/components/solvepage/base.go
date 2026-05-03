@@ -73,7 +73,7 @@ func (m SolvePageModel) Init() tea.Cmd {
 const labelsHeight = 2
 
 func (m SolvePageModel) View() tea.View {
-	innerHeight := m.Dims.Height - 2 - labelsHeight // border (2) + labels (2)
+	innerHeight := m.Dims.Height - 1
 
 	// Directory label
 	dirSelection := m.style.selected.Render("N/A")
@@ -89,7 +89,7 @@ func (m SolvePageModel) View() tea.View {
 	}
 	langLabel := fmt.Sprintf("%s %s", m.style.title.Render("Language:"), langSelection)
 
-	panelWidth := (m.Dims.Width - 4) / 2
+	panelWidth := (m.Dims.Width) / 2
 
 	fpBorder := m.style.border(m.focusedChild == focus.FilePicker).
 		Width(panelWidth).
