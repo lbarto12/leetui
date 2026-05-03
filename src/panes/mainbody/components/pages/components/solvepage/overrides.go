@@ -4,8 +4,12 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 
+	"leetui/src/lib/common/layers/alerts"
 	"leetui/src/lib/graphqlapi/models"
+
+	tea "charm.land/bubbletea/v2"
 )
 
 var langExtensions = map[string]string{
@@ -34,9 +38,12 @@ var langExtensions = map[string]string{
 	"oraclesql":  "sql",
 }
 
-func CloneProblemAndOpenEditor(dir string, language string, problem models.ProblemDetails) {
+func (m SolvePageModel) CloneProblemAndOpenEditor(dir string, language string, problem models.ProblemDetails) (tea.Model, tea.Cmd) {
 	if dir == "" || language == "" {
-		return
+		return m, alerts.AlertErrorCmd(alerts.AlertErrorMsg{
+			Duration: time.Second * 5,
+			Message:  "please specify directory and lanugage",
+		})
 	}
 
 	problemDir := filepath.Join(dir, problem.TitleSlug)
@@ -76,4 +83,6 @@ func CloneProblemAndOpenEditor(dir string, language string, problem models.Probl
 	cmd := exec.Command(terminal, "-e", editor, ".")
 	cmd.Dir = problemDir
 	cmd.Start()
+
+	return m, nil
 }

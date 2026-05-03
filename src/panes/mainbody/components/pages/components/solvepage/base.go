@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"leetui/src/lib/common/layers/alerts"
 	"leetui/src/lib/graphqlapi/models"
 	"leetui/src/lib/viewmodel"
 	"leetui/src/panes/mainbody/components/pages/components/solvepage/focus"
@@ -44,8 +45,9 @@ func MakeSolvePageModel() SolvePageModel {
 		style:        MakeStyles(),
 		focusedChild: focus.FilePicker,
 		children: Children{
-			filePicker: fp,
-			langList:   ll,
+			filePicker:            fp,
+			langList:              ll,
+			cannotCloneErrorModal: alerts.MakeErrorModalModel(),
 		},
 	}
 }
@@ -111,7 +113,19 @@ func (m SolvePageModel) View() tea.View {
 		lipgloss.JoinHorizontal(lipgloss.Top, picker, langList),
 	)
 
-	return tea.NewView(content)
+	layers := []*lipgloss.Layer{
+		lipgloss.NewLayer(content),
+		lipgloss.NewLayer("").
+			AddLayers(
+				lipgloss.NewLayer(m.children.cannotCloneErrorModal.View().Content).
+					X(m.GetSize().Width - m.children.cannotCloneErrorModal.GetSize().Width).
+					Y(0),
+			),
+	}
+
+	comp := lipgloss.NewCompositor(layers...)
+
+	return tea.NewView(comp.Render())
 }
 
 func (m SolvePageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {

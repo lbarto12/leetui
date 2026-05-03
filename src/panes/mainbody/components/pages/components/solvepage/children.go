@@ -1,6 +1,7 @@
 package solvepage
 
 import (
+	"leetui/src/lib/common/layers/alerts"
 	"leetui/src/panes/mainbody/components/pages/components/solvepage/focus"
 
 	"charm.land/bubbles/v2/filepicker"
@@ -9,8 +10,9 @@ import (
 )
 
 type Children struct {
-	filePicker filepicker.Model
-	langList   list.Model
+	filePicker            filepicker.Model
+	langList              list.Model
+	cannotCloneErrorModal alerts.ErrorModalModel
 }
 
 // PassToChildren forwards messages to all children (for non-keypress messages).
@@ -21,9 +23,13 @@ func (m SolvePageModel) PassToChildren(msg tea.Msg) (tea.Model, tea.Cmd) {
 	ll, llcmd := m.children.langList.Update(msg)
 	m.children.langList = ll
 
+	em, emcmd := m.children.cannotCloneErrorModal.Update(msg)
+	m.children.cannotCloneErrorModal = em.(alerts.ErrorModalModel)
+
 	return m, tea.Batch(
 		fpcmd,
 		llcmd,
+		emcmd,
 	)
 }
 
