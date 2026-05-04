@@ -19,6 +19,7 @@ type SidebarModel struct {
 	collapsed    bool
 	focusedChild string
 	styles       Styles
+	keys         SidebarKeyMap
 
 	// components
 	search      textinput.Model
@@ -34,6 +35,7 @@ func NewSidebarModel() (*SidebarModel, error) {
 		collapsed:    false,
 		focusedChild: focus.SearchBar,
 		styles:       MakeStyles(),
+		keys:         MakeSidebarKeyMap(),
 		search:       components.ProblemSearchBar(),
 		problemlist:  problemlist.MakeProblemListViewModel(),
 	}, nil

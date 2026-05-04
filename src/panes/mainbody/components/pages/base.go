@@ -16,6 +16,7 @@ import (
 type MainBodyPagesModel struct {
 	viewmodel.ViewModel
 	children       Children
+	keys           PagesKeyMap
 	selectedPage   int
 	problemDetails models.ProblemDetails
 }
@@ -33,6 +34,7 @@ func MakeMainBodyPagesModel() MainBodyPagesModel {
 			descriptionPage: descriptionpage.MakeDescriptionPageModel(),
 			solvePage:       solvepage.MakeSolvePageModel(),
 		},
+		keys:         MakePagesKeyMap(),
 		selectedPage: focus.DescriptionPage,
 	}
 }

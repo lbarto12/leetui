@@ -17,6 +17,7 @@ import (
 type ProblemlistViewModel struct {
 	viewmodel.ViewModel
 	styles         Styles
+	keys           ProblemListKeyMap
 	problems       []models.Problem
 	searchCancel   context.CancelFunc
 	loading        bool
@@ -66,6 +67,7 @@ func MakeProblemListViewModel() ProblemlistViewModel {
 		loadingSpinner: problemLoadingSpinner,
 		table:          ptable,
 		styles:         styles,
+		keys:           MakeProblemListKeyMap(),
 	}
 }
 

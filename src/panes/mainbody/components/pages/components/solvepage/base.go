@@ -19,6 +19,7 @@ import (
 type SolvePageModel struct {
 	viewmodel.ViewModel
 	style          Style
+	keys           SolvePageKeyMap
 	children       Children
 	problemDetails models.ProblemDetails
 	selectedDir    string
@@ -43,6 +44,7 @@ func MakeSolvePageModel() SolvePageModel {
 			Focused: false,
 		},
 		style:        MakeStyles(),
+		keys:         MakeSolvePageKeyMap(),
 		focusedChild: focus.FilePicker,
 		children: Children{
 			filePicker:            fp,
