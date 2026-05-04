@@ -3,7 +3,7 @@ package graphqlapi
 import (
 	"context"
 
-	"leetui/src/lib/graphqlapi/models"
+	"github.com/lbarto12/leetui/src/lib/graphqlapi/models"
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/hasura/go-graphql-client"

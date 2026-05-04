@@ -1,8 +1,8 @@
 package pages
 
 import (
-	"leetui/src/lib/keymap"
-	"leetui/src/panes/mainbody/components/pages/focus"
+	"github.com/lbarto12/leetui/src/lib/keymap"
+	"github.com/lbarto12/leetui/src/panes/mainbody/components/pages/focus"
 
 	"charm.land/bubbles/v2/key"
 )

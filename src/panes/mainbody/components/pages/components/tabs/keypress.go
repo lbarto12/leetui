@@ -1,7 +1,7 @@
 package tabs
 
 import (
-	"leetui/src/lib/common/cmds"
+	"github.com/lbarto12/leetui/src/lib/common/cmds"
 
 	tea "charm.land/bubbletea/v2"
 )

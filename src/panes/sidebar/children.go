@@ -1,7 +1,7 @@
 package sidebar
 
 import (
-	"leetui/src/lib/chup"
+	"github.com/lbarto12/leetui/src/lib/chup"
 
 	tea "charm.land/bubbletea/v2"
 )

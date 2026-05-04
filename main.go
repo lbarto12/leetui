@@ -3,20 +3,31 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
-	"leetui/src/app"
-	"leetui/src/lib/graphqlapi"
+	"github.com/lbarto12/leetui/src/app"
+	"github.com/lbarto12/leetui/src/lib/graphqlapi"
 
 	tea "charm.land/bubbletea/v2"
 )
 
+// Version is overridden at build time via -ldflags "-X main.Version=...".
+var Version = "dev"
+
 func main() {
-	f, err := tea.LogToFile("debug.log", "debug")
-	if err != nil {
-		fmt.Println("fatal:", err)
-		os.Exit(1)
+	if os.Getenv("LEETUI_DEBUG") != "" {
+		path, err := debugLogPath()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "could not resolve debug log path:", err)
+			os.Exit(1)
+		}
+		f, err := tea.LogToFile(path, "debug")
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "fatal:", err)
+			os.Exit(1)
+		}
+		defer f.Close()
 	}
-	defer f.Close()
 
 	graphqlapi.InitLeetcodeGraphQLClient()
 
@@ -26,4 +37,20 @@ func main() {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)
 	}
+}
+
+func debugLogPath() (string, error) {
+	stateDir := os.Getenv("XDG_STATE_HOME")
+	if stateDir == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", err
+		}
+		stateDir = filepath.Join(home, ".local", "state")
+	}
+	dir := filepath.Join(stateDir, "leetui")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, "debug.log"), nil
 }

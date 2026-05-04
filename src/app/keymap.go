@@ -1,8 +1,8 @@
 package app
 
 import (
-	"leetui/src/app/focus"
-	"leetui/src/lib/keymap"
+	"github.com/lbarto12/leetui/src/app/focus"
+	"github.com/lbarto12/leetui/src/lib/keymap"
 
 	"charm.land/bubbles/v2/key"
 )

@@ -3,8 +3,8 @@ package mainbody
 import (
 	"fmt"
 
-	"leetui/src/lib/common/cmds"
-	"leetui/src/lib/graphqlapi"
+	"github.com/lbarto12/leetui/src/lib/common/cmds"
+	"github.com/lbarto12/leetui/src/lib/graphqlapi"
 
 	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"

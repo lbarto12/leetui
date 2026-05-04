@@ -1,8 +1,8 @@
 package pages
 
 import (
-	"leetui/src/lib/graphqlapi/models"
-	"leetui/src/panes/mainbody/components/pages/focus"
+	"github.com/lbarto12/leetui/src/lib/graphqlapi/models"
+	"github.com/lbarto12/leetui/src/panes/mainbody/components/pages/focus"
 )
 
 func (m *MainBodyPagesModel) SetPage(page int) {

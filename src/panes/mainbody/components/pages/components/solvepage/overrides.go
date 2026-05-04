@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"leetui/src/lib/common/layers/alerts"
-	"leetui/src/lib/graphqlapi/models"
+	"github.com/lbarto12/leetui/src/lib/common/layers/alerts"
+	"github.com/lbarto12/leetui/src/lib/graphqlapi/models"
 
 	tea "charm.land/bubbletea/v2"
 )

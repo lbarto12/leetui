@@ -1,9 +1,9 @@
 package app
 
 import (
-	"leetui/src/app/focus"
-	"leetui/src/panes/mainbody"
-	"leetui/src/panes/sidebar"
+	"github.com/lbarto12/leetui/src/app/focus"
+	"github.com/lbarto12/leetui/src/panes/mainbody"
+	"github.com/lbarto12/leetui/src/panes/sidebar"
 
 	tea "charm.land/bubbletea/v2"
 )

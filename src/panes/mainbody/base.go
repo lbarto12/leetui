@@ -4,9 +4,9 @@ package mainbody
 import (
 	"fmt"
 
-	"leetui/src/lib/graphqlapi/models"
-	"leetui/src/lib/viewmodel"
-	"leetui/src/panes/mainbody/components/pages"
+	"github.com/lbarto12/leetui/src/lib/graphqlapi/models"
+	"github.com/lbarto12/leetui/src/lib/viewmodel"
+	"github.com/lbarto12/leetui/src/panes/mainbody/components/pages"
 
 	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"

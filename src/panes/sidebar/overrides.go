@@ -1,6 +1,6 @@
 package sidebar
 
-import "leetui/src/panes/sidebar/focus"
+import "github.com/lbarto12/leetui/src/panes/sidebar/focus"
 
 func (m *SidebarModel) SetFocused(f bool) { // @override
 	m.Focused = f

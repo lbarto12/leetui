@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 
-	"leetui/src/lib/common/layers/alerts"
-	"leetui/src/lib/graphqlapi/models"
-	"leetui/src/lib/viewmodel"
-	"leetui/src/panes/mainbody/components/pages/components/solvepage/focus"
+	"github.com/lbarto12/leetui/src/lib/common/layers/alerts"
+	"github.com/lbarto12/leetui/src/lib/graphqlapi/models"
+	"github.com/lbarto12/leetui/src/lib/viewmodel"
+	"github.com/lbarto12/leetui/src/panes/mainbody/components/pages/components/solvepage/focus"
 
 	"charm.land/bubbles/v2/filepicker"
 	"charm.land/bubbles/v2/list"

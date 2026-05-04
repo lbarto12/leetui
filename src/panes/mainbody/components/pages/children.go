@@ -1,11 +1,11 @@
 package pages
 
 import (
-	"leetui/src/lib/chup"
-	"leetui/src/panes/mainbody/components/pages/components/descriptionpage"
-	"leetui/src/panes/mainbody/components/pages/components/solvepage"
-	"leetui/src/panes/mainbody/components/pages/components/tabs"
-	"leetui/src/panes/mainbody/components/pages/focus"
+	"github.com/lbarto12/leetui/src/lib/chup"
+	"github.com/lbarto12/leetui/src/panes/mainbody/components/pages/components/descriptionpage"
+	"github.com/lbarto12/leetui/src/panes/mainbody/components/pages/components/solvepage"
+	"github.com/lbarto12/leetui/src/panes/mainbody/components/pages/components/tabs"
+	"github.com/lbarto12/leetui/src/panes/mainbody/components/pages/focus"
 
 	tea "charm.land/bubbletea/v2"
 )

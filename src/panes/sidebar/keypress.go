@@ -1,9 +1,9 @@
 package sidebar
 
 import (
-	"leetui/src/lib/common/cmds"
-	"leetui/src/panes/sidebar/components/problemlist"
-	"leetui/src/panes/sidebar/focus"
+	"github.com/lbarto12/leetui/src/lib/common/cmds"
+	"github.com/lbarto12/leetui/src/panes/sidebar/components/problemlist"
+	"github.com/lbarto12/leetui/src/panes/sidebar/focus"
 
 	tea "charm.land/bubbletea/v2"
 )

@@ -2,7 +2,7 @@
 package descriptionpage
 
 import (
-	"leetui/src/lib/viewmodel"
+	"github.com/lbarto12/leetui/src/lib/viewmodel"
 
 	"charm.land/bubbles/v2/viewport"
 	tea "charm.land/bubbletea/v2"

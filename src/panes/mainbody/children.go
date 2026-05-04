@@ -1,8 +1,8 @@
 package mainbody
 
 import (
-	"leetui/src/lib/chup"
-	"leetui/src/panes/mainbody/components/pages"
+	"github.com/lbarto12/leetui/src/lib/chup"
+	"github.com/lbarto12/leetui/src/panes/mainbody/components/pages"
 
 	tea "charm.land/bubbletea/v2"
 )

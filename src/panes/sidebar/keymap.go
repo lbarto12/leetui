@@ -1,8 +1,8 @@
 package sidebar
 
 import (
-	"leetui/src/lib/keymap"
-	"leetui/src/panes/sidebar/focus"
+	"github.com/lbarto12/leetui/src/lib/keymap"
+	"github.com/lbarto12/leetui/src/panes/sidebar/focus"
 
 	"charm.land/bubbles/v2/key"
 )

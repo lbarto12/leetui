@@ -1,7 +1,7 @@
 package solvepage
 
 import (
-	"leetui/src/panes/mainbody/components/pages/components/solvepage/focus"
+	"github.com/lbarto12/leetui/src/panes/mainbody/components/pages/components/solvepage/focus"
 
 	tea "charm.land/bubbletea/v2"
 )

@@ -5,9 +5,9 @@ import (
 	"context"
 	"log"
 
-	"leetui/src/lib/graphqlapi"
-	"leetui/src/lib/graphqlapi/models"
-	"leetui/src/lib/viewmodel"
+	"github.com/lbarto12/leetui/src/lib/graphqlapi"
+	"github.com/lbarto12/leetui/src/lib/graphqlapi/models"
+	"github.com/lbarto12/leetui/src/lib/viewmodel"
 
 	"charm.land/bubbles/v2/spinner"
 	"charm.land/bubbles/v2/table"

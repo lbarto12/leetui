@@ -1,4 +1,4 @@
-module leetui
+module github.com/lbarto12/leetui
 
 go 1.26.1
 

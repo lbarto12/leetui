@@ -1,6 +1,6 @@
 package mainbody
 
-import "leetui/src/lib/keymap"
+import "github.com/lbarto12/leetui/src/lib/keymap"
 
 func (m MainBodyModel) ActiveHelp() keymap.Provider {
 	if !m.hasProblem() || m.loading {

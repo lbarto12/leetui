@@ -1,7 +1,7 @@
 package problemlist
 
 import (
-	"leetui/src/lib/graphqlapi/models"
+	"github.com/lbarto12/leetui/src/lib/graphqlapi/models"
 
 	"charm.land/bubbles/v2/table"
 )

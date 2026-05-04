@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"leetui/src/lib/viewmodel"
+	"github.com/lbarto12/leetui/src/lib/viewmodel"
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"

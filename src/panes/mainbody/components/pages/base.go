@@ -2,12 +2,12 @@
 package pages
 
 import (
-	"leetui/src/lib/graphqlapi/models"
-	"leetui/src/lib/viewmodel"
-	"leetui/src/panes/mainbody/components/pages/components/descriptionpage"
-	"leetui/src/panes/mainbody/components/pages/components/solvepage"
-	"leetui/src/panes/mainbody/components/pages/components/tabs"
-	"leetui/src/panes/mainbody/components/pages/focus"
+	"github.com/lbarto12/leetui/src/lib/graphqlapi/models"
+	"github.com/lbarto12/leetui/src/lib/viewmodel"
+	"github.com/lbarto12/leetui/src/panes/mainbody/components/pages/components/descriptionpage"
+	"github.com/lbarto12/leetui/src/panes/mainbody/components/pages/components/solvepage"
+	"github.com/lbarto12/leetui/src/panes/mainbody/components/pages/components/tabs"
+	"github.com/lbarto12/leetui/src/panes/mainbody/components/pages/focus"
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"

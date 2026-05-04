@@ -3,8 +3,8 @@ package problemlist
 import (
 	"context"
 
-	"leetui/src/lib/common/cmds"
-	"leetui/src/lib/graphqlapi"
+	"github.com/lbarto12/leetui/src/lib/common/cmds"
+	"github.com/lbarto12/leetui/src/lib/graphqlapi"
 
 	tea "charm.land/bubbletea/v2"
 )

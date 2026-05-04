@@ -2,11 +2,11 @@
 package sidebar
 
 import (
-	"leetui/src/lib/chup"
-	"leetui/src/lib/viewmodel"
-	"leetui/src/panes/sidebar/components"
-	"leetui/src/panes/sidebar/components/problemlist"
-	"leetui/src/panes/sidebar/focus"
+	"github.com/lbarto12/leetui/src/lib/chup"
+	"github.com/lbarto12/leetui/src/lib/viewmodel"
+	"github.com/lbarto12/leetui/src/panes/sidebar/components"
+	"github.com/lbarto12/leetui/src/panes/sidebar/components/problemlist"
+	"github.com/lbarto12/leetui/src/panes/sidebar/focus"
 
 	"charm.land/bubbles/v2/textinput"
 	"charm.land/bubbletea/v2"
