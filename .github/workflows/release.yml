@@ -157,7 +157,7 @@ jobs:
           cat "$pkgbuild"
 
       - name: Publish to AUR
-        uses: KSXGitHub/github-actions-deploy-aur@v3.0.1
+        uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
         with:
           pkgname: ${{ matrix.pkg }}
           pkgbuild: packaging/aur/${{ matrix.pkg }}/PKGBUILD
