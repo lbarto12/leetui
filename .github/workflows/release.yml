@@ -156,13 +156,60 @@ jobs:
           echo "--- rendered ---"
           cat "$pkgbuild"
 
-      - name: Publish to AUR
-        uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
-        with:
-          pkgname: ${{ matrix.pkg }}
-          pkgbuild: packaging/aur/${{ matrix.pkg }}/PKGBUILD
-          commit_username: lbarto12
-          commit_email: liam@liambarrack.com
-          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-          commit_message: "Update to v${{ needs.tag.outputs.new_version }}"
-          ssh_keyscan_types: rsa,ecdsa,ed25519
+      - name: Set up SSH for AUR
+        env:
+          SSH_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_aur
+          chmod 600 ~/.ssh/id_aur
+          ssh-keyscan -t ed25519,rsa,ecdsa aur.archlinux.org > ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<'EOF'
+          Host aur.archlinux.org
+            User aur
+            IdentityFile ~/.ssh/id_aur
+            IdentitiesOnly yes
+            StrictHostKeyChecking accept-new
+          EOF
+
+      - name: Sync to AUR
+        run: |
+          set -euo pipefail
+          pkg="${{ matrix.pkg }}"
+          repo="ssh://aur@aur.archlinux.org/${pkg}.git"
+
+          rm -rf /tmp/aur
+          if git clone "$repo" /tmp/aur 2>/dev/null; then
+            echo "Cloned existing AUR package"
+          else
+            echo "Initializing new AUR package (first publish)"
+            mkdir -p /tmp/aur
+            git -C /tmp/aur init -q -b master
+            git -C /tmp/aur remote add origin "$repo"
+          fi
+
+          cp "packaging/aur/${pkg}/PKGBUILD" /tmp/aur/PKGBUILD
+
+          # Generate .SRCINFO via an Arch container (makepkg refuses to run as
+          # root, so create an unprivileged user inside the container).
+          docker run --rm -v /tmp/aur:/work archlinux:base-devel bash -c '
+            set -e
+            useradd -m -d /home/b b
+            chown -R b:b /work
+            su b -c "cd /work && makepkg --printsrcinfo > .SRCINFO"
+            chmod -R a+rw /work
+          '
+          sudo chown -R "$(id -u):$(id -g)" /tmp/aur
+
+          cd /tmp/aur
+          git config user.name "lbarto12"
+          git config user.email "liam@liambarrack.com"
+          git add PKGBUILD .SRCINFO
+          if git diff --cached --quiet; then
+            echo "No changes to push"
+            exit 0
+          fi
+          git commit -m "Update to v${{ needs.tag.outputs.new_version }}"
+          git push -u origin master
