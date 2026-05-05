@@ -2,13 +2,43 @@ name: Release
 
 on:
   push:
-    tags: ['v*']
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go build ./...
+      - run: go vet ./...
+
+  tag:
+    needs: test
+    runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.tag.outputs.new_tag }}
+      new_version: ${{ steps.tag.outputs.new_version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: tag
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: patch
+          tag_prefix: v
+
   build:
+    needs: tag
+    if: needs.tag.outputs.new_tag != ''
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -17,41 +47,122 @@ jobs:
           - { goos: linux, goarch: arm64 }
     steps:
       - uses: actions/checkout@v4
-
+        with:
+          ref: ${{ needs.tag.outputs.new_tag }}
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-
       - name: Build
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: 0
         run: |
-          version="${GITHUB_REF_NAME#v}"
+          version="${{ needs.tag.outputs.new_version }}"
           name="leetui-${version}-${GOOS}-${GOARCH}"
-          mkdir -p dist
-          go build -trimpath -ldflags="-s -w -X main.Version=${GITHUB_REF_NAME}" -o "dist/${name}/leetui" .
+          mkdir -p "dist/${name}"
+          go build -trimpath -ldflags="-s -w -X main.Version=v${version}" -o "dist/${name}/leetui" .
           cp LICENSE README.md "dist/${name}/"
           (cd dist && tar czf "${name}.tar.gz" "${name}" && sha256sum "${name}.tar.gz" > "${name}.tar.gz.sha256")
-
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.goos }}-${{ matrix.goarch }}
           path: dist/*.tar.gz*
 
   release:
-    needs: build
+    needs: [tag, build]
+    if: needs.tag.outputs.new_tag != ''
     runs-on: ubuntu-latest
+    outputs:
+      sums_amd64: ${{ steps.sums.outputs.amd64 }}
+      sums_arm64: ${{ steps.sums.outputs.arm64 }}
+      sums_src:   ${{ steps.sums.outputs.src }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.tag.outputs.new_tag }}
       - uses: actions/download-artifact@v4
         with:
           path: dist
           merge-multiple: true
-
       - uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ needs.tag.outputs.new_tag }}
           files: |
             dist/*.tar.gz
             dist/*.sha256
           generate_release_notes: true
+      - id: sums
+        name: Compute sha256 sums for AUR
+        run: |
+          version="${{ needs.tag.outputs.new_version }}"
+          tag="v${version}"
+
+          amd64=$(sha256sum "dist/leetui-${version}-linux-amd64.tar.gz" | awk '{print $1}')
+          arm64=$(sha256sum "dist/leetui-${version}-linux-arm64.tar.gz" | awk '{print $1}')
+
+          # GitHub auto-generates a source tarball at this URL; retry until reachable.
+          src_url="https://github.com/${GITHUB_REPOSITORY}/archive/${tag}.tar.gz"
+          for i in $(seq 1 30); do
+            if curl -fsSL "$src_url" -o source.tar.gz; then break; fi
+            sleep 5
+          done
+          src=$(sha256sum source.tar.gz | awk '{print $1}')
+
+          {
+            echo "amd64=$amd64"
+            echo "arm64=$arm64"
+            echo "src=$src"
+          } >> "$GITHUB_OUTPUT"
+
+  publish-aur:
+    needs: [tag, release]
+    if: needs.tag.outputs.new_tag != ''
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        pkg: [leetui, leetui-bin, leetui-git]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.tag.outputs.new_tag }}
+          fetch-depth: 0
+
+      - name: Render PKGBUILD
+        run: |
+          set -euo pipefail
+          version="${{ needs.tag.outputs.new_version }}"
+          pkgbuild="packaging/aur/${{ matrix.pkg }}/PKGBUILD"
+
+          case "${{ matrix.pkg }}" in
+            leetui)
+              sed -i "s/^pkgver=.*/pkgver=${version}/"   "$pkgbuild"
+              sed -i "s/^pkgrel=.*/pkgrel=1/"            "$pkgbuild"
+              sed -i "s|^sha256sums=.*|sha256sums=('${{ needs.release.outputs.sums_src }}')|" "$pkgbuild"
+              ;;
+            leetui-bin)
+              sed -i "s/^pkgver=.*/pkgver=${version}/"   "$pkgbuild"
+              sed -i "s/^pkgrel=.*/pkgrel=1/"            "$pkgbuild"
+              sed -i "s|^sha256sums_x86_64=.*|sha256sums_x86_64=('${{ needs.release.outputs.sums_amd64 }}')|" "$pkgbuild"
+              sed -i "s|^sha256sums_aarch64=.*|sha256sums_aarch64=('${{ needs.release.outputs.sums_arm64 }}')|" "$pkgbuild"
+              ;;
+            leetui-git)
+              gitver=$(git describe --long --tags --abbrev=7 \
+                | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g')
+              sed -i "s/^pkgver=.*/pkgver=${gitver}/" "$pkgbuild"
+              ;;
+          esac
+          echo "--- rendered ---"
+          cat "$pkgbuild"
+
+      - name: Publish to AUR
+        uses: KSXGitHub/github-actions-deploy-aur@v3.0.1
+        with:
+          pkgname: ${{ matrix.pkg }}
+          pkgbuild: packaging/aur/${{ matrix.pkg }}/PKGBUILD
+          commit_username: lbarto12
+          commit_email: liam@liambarrack.com
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: "Update to v${{ needs.tag.outputs.new_version }}"
+          ssh_keyscan_types: rsa,ecdsa,ed25519

@@ -1,33 +1,31 @@
 # AUR packaging
 
-Reference copies of the PKGBUILDs published to the AUR. The AUR itself
-is a separate git remote per package — these dirs are not used directly
-by makepkg from this repo.
+These PKGBUILDs are **templates**. The release workflow renders them with
+the real version + sha256 sums and pushes them to AUR automatically on
+every push to `main`. You should not need to edit them by hand.
 
-## Workflow per release
+The packages:
 
-1. Cut a release on GitHub (push to `main` → `Auto-tag` workflow → `Release`
-   workflow attaches `tar.gz` + `.sha256` assets).
-2. For each AUR package, copy the matching PKGBUILD into a clone of the
-   AUR repo and refresh it:
+- `leetui` — source build of the latest tagged release
+- `leetui-bin` — prebuilt binary of the latest tagged release
+- `leetui-git` — VCS package; builds from `main` HEAD
 
-   ```sh
-   cd /path/to/aur-leetui            # ssh://aur@aur.archlinux.org/leetui.git
-   cp .../packaging/aur/leetui/PKGBUILD .
-   updpkgsums                        # fills sha256sums
-   makepkg --printsrcinfo > .SRCINFO
-   git commit -am "v0.1.0"
-   git push
-   ```
+## One-time setup
 
-   Repeat for `leetui-bin` and `leetui-git` (the `-git` PKGBUILD doesn't
-   need version bumps — `pkgver()` derives it from the live repo).
+1. Create an AUR account at https://aur.archlinux.org/register and add an
+   SSH public key under your account settings.
+2. On your dev machine, confirm SSH works: `ssh aur@aur.archlinux.org` should
+   greet you and exit.
+3. Add the matching **private** key to this GitHub repo's secrets as
+   `AUR_SSH_PRIVATE_KEY` (Settings → Secrets and variables → Actions →
+   New repository secret). Paste the file contents including the
+   `-----BEGIN ... PRIVATE KEY-----` lines.
 
-## First-time AUR setup
+That's it. The first push to `main` after this triggers a release and
+populates all three AUR packages.
 
-```sh
-ssh aur@aur.archlinux.org   # registers your SSH key on first try
-git clone ssh://aur@aur.archlinux.org/leetui.git
-git clone ssh://aur@aur.archlinux.org/leetui-bin.git
-git clone ssh://aur@aur.archlinux.org/leetui-git.git
-```
+## Manual edits
+
+If you need to change a PKGBUILD itself (e.g. add a dependency), edit
+the file in `packaging/aur/<pkg>/PKGBUILD` here, push to main, and the
+workflow handles the rest.
